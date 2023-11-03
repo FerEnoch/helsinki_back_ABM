@@ -36,6 +36,7 @@ export const COLUMN_HEADERS = {
   MAIN_SHEET_ACCOUNT: {
     payment_method: /medio/i,
     cbu_or_link: /cbu|link/i,
+    service: /servicio/i,
     alias: /alias/i,
     cuil: /cuil/i,
   },
