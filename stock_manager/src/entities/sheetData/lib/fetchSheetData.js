@@ -1,11 +1,10 @@
-import { actionColumnHeaders } from '../config/spreadsheet';
 /**
  * Fetch raw data from a sheet in a given spreadsheet
  * @param {string} spreadsheetID given spreedsheet ID
  * @param {string} sheetName the sheet name inside that spreadsheet
  * @returns {Promise<{rawData: string[], headerIndexes: number[]}>} { rawData, headerIndexes }
  */
-export async function fetchSheetData(spreadsheetID, sheetName) {
+export async function fetchSheetData(spreadsheetID, sheetName, reqColumns) {
   const originSpreadsheet = SpreadsheetApp.openById(spreadsheetID);
   const originDataSheet = originSpreadsheet.getSheetByName(sheetName);
   const headerIndexes = [];
@@ -17,7 +16,7 @@ export async function fetchSheetData(spreadsheetID, sheetName) {
 
   if (dataFromSheet.length > 0) {
     rawData = dataFromSheet;
-    Object.values(actionColumnHeaders).forEach((actionHeader) => {
+    Object.values(reqColumns).forEach((actionHeader) => {
       const actionHeaderIndex = rawData[0].findIndex((rawHeader) => rawHeader && actionHeader.test(rawHeader));
       if (actionHeaderIndex !== -1) headerIndexes.push(actionHeaderIndex);
     });

@@ -1,6 +1,5 @@
-import { actionColumnHeaders } from '../../../entities/sheetData/config/spreadsheet';
+export function validateKey(validatingHeader, model) {
+  if (model?.image?.test(validatingHeader)) return 'imageID';
 
-export function validateKey(validating) {
-  if (actionColumnHeaders.image.test(validating)) return 'imageID';
-  return Object.keys(actionColumnHeaders).find((key) => actionColumnHeaders[key].test(validating));
+  return Object.keys(model).find((key) => model[key]?.test(validatingHeader));
 }

@@ -1,4 +1,4 @@
-import { COMPLETE_RESOURCE_PATH, ERROR_MESSAGES } from '../../../shared/api/config/firebase-api';
+import { DATABASE_FOLDERS, ERROR_MESSAGES, FIREBASE } from '../../../shared/api/config/firebase-api';
 import { firestoreCreateFile } from '../../../shared/api/model/firestoreCreateFile';
 import { storageCreateFile } from '../../../shared/api/model/storageCreateFile';
 
@@ -10,6 +10,11 @@ import { storageCreateFile } from '../../../shared/api/model/storageCreateFile';
 export function firebaseDatabaseCreateFiles(files = []) {
   if (!files.length) return Logger.log('NO PRODUCTS TO CREATE IN FIREBASE');
 
+  const {
+    FIRESTORE: { RESOURCE_PATH },
+  } = FIREBASE;
+  const completeResourcePath = RESOURCE_PATH(DATABASE_FOLDERS.PRODUCTS);
+
   const createdFiles = [];
   try {
     files.forEach((file) => {
@@ -19,14 +24,14 @@ export function firebaseDatabaseCreateFiles(files = []) {
       const statusCode = firestoreResponse.getResponseCode();
       if (statusCode === 200) {
         const { name } = JSON.parse(firestoreResponse.getContentText());
-        const resourceNamePath = `${COMPLETE_RESOURCE_PATH}/`;
+        const resourceNamePath = `${completeResourcePath}/`;
         const docID = name.slice(resourceNamePath.length);
-        const productToCache = {
+        const dataToCache = {
           'firestoreName-ID': docID,
           firestoreName: name,
           ...file,
         };
-        createdFiles.push(productToCache);
+        createdFiles.push(dataToCache);
         Logger.log(`FILE CREATED: ${docID} --> ${file.id}`);
         /**  Only upload images for files that have Its image ID  */
         if (file.imageID) {

@@ -1,46 +1,47 @@
-import { SPREADSHEET } from '../sheetData/config/spreadsheet';
 import { fetchSheetData } from '../sheetData/lib/fetchSheetData';
 import { toCacheSheetDataBuilding } from '../sheetData/lib/toCacheSheetDataBuilding';
 
 /**
  * Gets current cache sheet data
- * @return {Promise<Product[]>} Array of products that are cached
+ * @return {Promise<Value[]>} Array of values (objects) that are in the given cache sheet
  */
-export async function getCacheSheetData() {
-  const { rawData: cachedDataArrays } = await fetchSheetData(SPREADSHEET.CACHE_SPREADSHEET_ID, SPREADSHEET.CACHE);
-  if (!cachedDataArrays.length) return [];
-  const cacheProducts = [];
+export async function getCacheSheetData(sheetID, sheetName, reqHeaders) {
+  const { rawData: cachedDataArrays } = await fetchSheetData(sheetID, sheetName, reqHeaders);
+  if (!cachedDataArrays?.length) return [];
+  const cacheValues = [];
   const headers = [];
-  cachedDataArrays.forEach((productDataRow, rowIndex) => {
-    if (!productDataRow || !productDataRow.length) return;
-    const product = {};
+  cachedDataArrays.forEach((valueDataRow, rowIndex) => {
+    if (!valueDataRow || !valueDataRow.length) return;
+    const value = {};
     /* First row of the cache sheet is the headers row */
     if (rowIndex === 0) {
-      productDataRow.forEach((header) => {
+      valueDataRow.forEach((header) => {
         headers.push(header);
       });
       return;
     }
-    productDataRow.forEach((productDataField, dataIndex) => {
-      product[headers[dataIndex]] = productDataField;
+    valueDataRow.forEach((entry, entryIndex) => {
+      value[headers[entryIndex]] = entry;
     });
-    cacheProducts.push(product);
+    cacheValues.push(value);
   });
-  return cacheProducts;
+  return cacheValues;
 }
 
 /**
  *  Writes data in cache sheet
+ *  @param {string} sheetID
+ *  @param {string} sheetName
  * @param {Array} rawData Products array: [ { [name.slice(69)]: { firestoreName: name, ...file } } ]
  * @return {void}
  */
-export async function overwriteCacheSheetData(rawData) {
-  console.log(`CACHING ${rawData.length} PRODUCTS`);  /* eslint-disable-line */
-  const cacheSpreadsheet = SpreadsheetApp.openById(SPREADSHEET.CACHE_SPREADSHEET_ID);
-  const cacheSheet = cacheSpreadsheet.getSheetByName(SPREADSHEET.CACHE);
+export async function overwriteCacheSheetData(sheetID, sheetName, rawData) {
+  console.log(`CACHING ${rawData.length} items`);  /* eslint-disable-line */
+  const cacheSpreadsheet = SpreadsheetApp.openById(sheetID);
+  const cacheSheet = cacheSpreadsheet.getSheetByName(sheetName);
 
   const toCacheSheetData = await toCacheSheetDataBuilding([...rawData]);
-  if (!toCacheSheetData.length) throw new Error('Unable to build data to copy to cache sheet');
+  if (!toCacheSheetData.length) throw new Error(`Unable to build data to copy to ${sheetName} sheet`);
 
   if (toCacheSheetData.length > 0) {
     cacheSheet.clearContents();

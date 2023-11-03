@@ -1,11 +1,16 @@
 import { firestoreAccessToken } from '../config/access-tokens';
-import { FIRESTORE_URL } from '../config/firebase-api';
+import { DATABASE_FOLDERS, FIREBASE } from '../config/firebase-api';
 
 export function firestoreUpdateDoc(
   { id, category, type, name, description, imageURL, imageID, destillery, alcohol, stock, price },
   docToUpdateFirestoreID
 ) {
-  return UrlFetchApp.fetch(`${FIRESTORE_URL}/${docToUpdateFirestoreID}`, {
+  const {
+    FIRESTORE: { COMPLETE_URL },
+  } = FIREBASE;
+  const firestoreURL = COMPLETE_URL(DATABASE_FOLDERS.PRODUCTS);
+
+  return UrlFetchApp.fetch(`${firestoreURL}/${docToUpdateFirestoreID}`, {
     method: 'PATCH',
     muteHttpExceptions: true,
     payload: JSON.stringify({

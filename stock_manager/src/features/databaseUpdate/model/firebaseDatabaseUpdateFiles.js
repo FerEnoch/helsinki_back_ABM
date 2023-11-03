@@ -1,4 +1,4 @@
-import { COMPLETE_RESOURCE_PATH, ERROR_MESSAGES } from '../../../shared/api/config/firebase-api';
+import { DATABASE_FOLDERS, ERROR_MESSAGES, FIREBASE } from '../../../shared/api/config/firebase-api';
 import { firestoreUpdateDoc } from '../../../shared/api/model/firestoreUpdateDoc';
 import { storageCreateFile } from '../../../shared/api/model/storageCreateFile';
 
@@ -9,10 +9,16 @@ import { storageCreateFile } from '../../../shared/api/model/storageCreateFile';
  */
 export function firebaseDatabaseUpdateFiles(products = []) {
   if (!products.length) return Logger.log('NO PRODUCTS TO UPDATE IN FIREBASE');
+
+  const {
+    FIRESTORE: { RESOURCE_PATH },
+  } = FIREBASE;
+  const completeResourcePath = RESOURCE_PATH(DATABASE_FOLDERS.PRODUCTS);
   const updatedFiles = [];
+
   try {
     products.forEach((prod) => {
-      const resourceNamePath = `${COMPLETE_RESOURCE_PATH}/`;
+      const resourceNamePath = `${completeResourcePath}/`;
       const docToUpdateFirestoreID = prod['firestoreName-ID'];
       const firestoreResponse = firestoreUpdateDoc(prod, docToUpdateFirestoreID);
       const statusCode = firestoreResponse.getResponseCode();

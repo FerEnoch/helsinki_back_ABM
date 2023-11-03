@@ -1,13 +1,13 @@
-import { dataBuilding } from '../../../entities/sheetData/lib/dataBuilding';
-import { SPREADSHEET } from '../../../entities/sheetData/config/spreadsheet';
+import { stockDataBuilding } from '../../../entities/sheetData/lib/stockDataBuilding';
+import { COLUMN_HEADERS, SPREADSHEET } from '../../../entities/sheetData/config/spreadsheet';
 import { getCacheSheetData, overwriteCacheSheetData } from '../../../entities/cache';
 import { analizeProductsToUpdateDatabase } from '../lib/analizeProductsToUpdateDatabase';
-import { DATABASE_API_ACTIONS, WEB_APP_API_ACTIONS } from '../../../shared/api';
+import { PRODUCTS_DATABASE_API_ACTIONS, WEB_APP_API_ACTIONS } from '../../../shared/api';
 import { DATABASE_OPERATIONS } from '../../../shared/api/config/database-operations';
 import { firebaseDatabaseDeleteFiles } from './firebaseDatabaseDeleteFiles';
 import { getFirestoreDocsList } from '../../../shared/api/model/getFirestoreCurrentDocs';
 import { ERROR_MESSAGES } from '../../../shared/api/config/firebase-api';
-import { UI_MESSAGES } from '../config/ui-messages';
+import { UI_MESSAGES } from '../../../shared/config/ui-messages';
 
 /**
  * TO DO
@@ -23,12 +23,16 @@ import { UI_MESSAGES } from '../config/ui-messages';
  */
 
 export async function databaseController() {
+  const { OPERATION_NOT_NECESSARY, OPERATION_SUCCESS } = UI_MESSAGES.MENU.APP_UPDATE.ITEM_1.PROMPT;
+  const { STOCK_SPREADSHEET_ID, STOCK, CACHE_SPREADSHEET_ID, PRODUCTS_CACHE } = SPREADSHEET;
+  const { PRODUCTS } = COLUMN_HEADERS;
+
   try {
-    const compiledStockData = await dataBuilding(SPREADSHEET.STOCK_SPREADSHEET_ID, SPREADSHEET.STOCK);
-    const cacheSheetData = await getCacheSheetData();
+    const compiledStockData = await stockDataBuilding(STOCK_SPREADSHEET_ID, STOCK);
+    const cacheSheetData = await getCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_CACHE, PRODUCTS);
 
     if (!compiledStockData.length) {
-      throw new Error('Unable to build data from Stock Sheet to update firestore database');
+      throw new Error('Unable to build stock data to update firestore database');
     }
 
     let isFirestoreToUpdate = false;
@@ -57,7 +61,7 @@ export async function databaseController() {
         /**
          * Create and populate firebase firestore & cloud storage database
          */
-        const uploadedProds = DATABASE_API_ACTIONS[DATABASE_OPERATIONS.ADD]([...compiledStockData]);
+        const uploadedProds = PRODUCTS_DATABASE_API_ACTIONS[DATABASE_OPERATIONS.ADD]([...compiledStockData]);
         /**
          * Update Web App cache
          */
@@ -70,7 +74,7 @@ export async function databaseController() {
         Logger.log(
           `CACHE IS EMPTY OR OUTDATED --> Clearing and adding ${finallyUpdatedProducts.length} products to cache sheet`
         );
-        await overwriteCacheSheetData(finallyUpdatedProducts);
+        await overwriteCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_CACHE, finallyUpdatedProducts);
       } else {
         Logger.log(`FOUND ${firestoreCurrentDocs.length} FIRESTORE PRODUCTS! Now Getting cache...`);
         /**
@@ -84,7 +88,7 @@ export async function databaseController() {
                 /**
                  * Update firestore
                  */
-                const operationResultProducts = DATABASE_API_ACTIONS[action](content);
+                const operationResultProducts = PRODUCTS_DATABASE_API_ACTIONS[action](content);
                 operationResultProducts?.forEach((updatedProd) => {
                   if (updatedProd) {
                     finallyUpdatedProducts.push(updatedProd);
@@ -117,7 +121,7 @@ export async function databaseController() {
           // console.log('{{{--FINAL--}}} PRODUCTS TO CACHE ---->>>', finallyUpdatedProducts.length); /* eslint-disable-line */
           if (finallyUpdatedProducts.length > 0) {
             Logger.log('UPDATING CACHE SHEET...');
-            await overwriteCacheSheetData(finallyUpdatedProducts);
+            await overwriteCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_CACHE, finallyUpdatedProducts);
             Logger.log('DONE!');
           }
         } else {
@@ -131,14 +135,14 @@ export async function databaseController() {
           // );
           firebaseDatabaseDeleteFiles(firestoreCurrentDocs);
 
-          const uploadedProds = DATABASE_API_ACTIONS[DATABASE_OPERATIONS.ADD]([...compiledStockData]);
+          const uploadedProds = PRODUCTS_DATABASE_API_ACTIONS[DATABASE_OPERATIONS.ADD]([...compiledStockData]);
 
           /**
            * Update the local cache sheet
            */
           Logger.log('Populating cache...');
           finallyUpdatedProducts = [...uploadedProds];
-          await overwriteCacheSheetData(finallyUpdatedProducts);
+          await overwriteCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_CACHE, finallyUpdatedProducts);
 
           // console.log('{{{--FINAL--}}} PRODUCTS TO CACHE ---->>>', finallyUpdatedProducts.length); /* eslint-disable-line */
           Logger.log('DONE!');
@@ -170,10 +174,10 @@ export async function databaseController() {
     );
 
     if (isFirestoreToUpdate && isWebAppCacheUpToDate && compiledStockData.length === finallyUpdatedProducts.length) {
-      return UI_MESSAGES.UPDATE_SUCCESS(finallyUpdatedProducts.length);
+      return OPERATION_SUCCESS(finallyUpdatedProducts.length);
     }
     if (!isFirestoreToUpdate && !isWebAppCacheUpToDate) {
-      return UI_MESSAGES.UPDATE_NOT_NECESSARY;
+      return OPERATION_NOT_NECESSARY;
     }
     return ERROR_MESSAGES.GENERIC;
   } catch (e) {

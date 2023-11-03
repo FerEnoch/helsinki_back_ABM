@@ -1,8 +1,14 @@
 import { firestoreAccessToken } from '../config/access-tokens';
-import { COMPLETE_RESOURCE_PATH, ERROR_MESSAGES, FIRESTORE_URL } from '../config/firebase-api';
+import { DATABASE_FOLDERS, ERROR_MESSAGES, FIREBASE } from '../config/firebase-api';
 
 function fetchData(nextPageToken = '') {
-  return UrlFetchApp.fetch(nextPageToken ? `${FIRESTORE_URL}?pageToken=${nextPageToken}` : FIRESTORE_URL, {
+  const {
+    FIRESTORE: { COMPLETE_URL },
+  } = FIREBASE;
+
+  const firestoreURL = COMPLETE_URL(DATABASE_FOLDERS.PRODUCTS);
+
+  return UrlFetchApp.fetch(nextPageToken ? `${firestoreURL}?pageToken=${nextPageToken}` : firestoreURL, {
     method: 'GET',
     muteHttpExceptions: true,
     headers: {
@@ -18,7 +24,11 @@ function fetchData(nextPageToken = '') {
 export function getFirestoreDocsList() {
   console.log('GETING FIRESTORE DOCS...'); /* eslint-disable-line */
 
-  const completeResourcePath = `${COMPLETE_RESOURCE_PATH}/`;
+  const {
+    FIRESTORE: { RESOURCE_PATH },
+  } = FIREBASE;
+  const resourcePath = RESOURCE_PATH(DATABASE_FOLDERS.PRODUCTS);
+  const completeResourcePath = `${resourcePath}/`;
   const prodsFirestoreName = [];
   let productsCollection;
   let nextPageToken;

@@ -1,15 +1,15 @@
-import { updatePrompt } from '../lib/updatePrompt';
 import { UI_MESSAGES } from '../../shared/config/ui-messages';
-import { databaseController } from './model/databaseController';
+import { updatePrompt } from '../lib/updatePrompt';
+import { updateAppInfo } from './model/updateAppInfo';
 
-export default async function stockUpdate() {
-  const { INFO, CONFIRM, OPERATION_FAILURE } = UI_MESSAGES.MENU.APP_UPDATE.ITEM_1.PROMPT;
+export async function infoUpdate() {
+  const { INFO, CONFIRM, OPERATION_FAILURE, OPERATION_SUCCESS } = UI_MESSAGES.MENU.APP_UPDATE.ITEM_2.PROMPT;
   const [UI, result] = updatePrompt(INFO, CONFIRM);
 
   if (result === UI.Button.YES) {
     try {
-      const appUpdated = await databaseController();
-      UI.alert(appUpdated);
+      const { message } = await updateAppInfo();
+      if (message === 'success') UI.alert(OPERATION_SUCCESS);
     } catch (e) {
       console.error(e.message); /* eslint-disable-line */
       if (e.cause === 429) {

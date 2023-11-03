@@ -1,9 +1,11 @@
 import { fetchSheetData } from './fetchSheetData';
-import { actionColumnHeaders } from '../config/spreadsheet';
+import { COLUMN_HEADERS, INITIAL_URL_FRAGMENTS } from '../config/spreadsheet';
 import { validateKey } from '../../../features/databaseUpdate/lib/validateKey';
 
-export async function dataBuilding(...args) {
-  return fetchSheetData(...args).then(({ rawData, headerIndexes }) => {
+export async function stockDataBuilding(...args) {
+  const { PRODUCTS: requiredProductKeys } = COLUMN_HEADERS;
+
+  return fetchSheetData(...args, requiredProductKeys).then(({ rawData, headerIndexes }) => {
     if (!rawData.length) throw new Error('No se pudo compilar la información para actualizar la app');
     const toDatabaseData = [];
     let stockIndex;
@@ -15,26 +17,26 @@ export async function dataBuilding(...args) {
      * Build the rows of needed data out of raw data
      */
     rawData.forEach((rawRow, rawDataIndex) => {
-      let appRow = [];
-      headerIndexes.forEach((headerIndex) => appRow.push(rawRow[headerIndex]));
+      const productReqDataRow = [];
+      headerIndexes.forEach((headerIndex) => productReqDataRow.push(rawRow[headerIndex]));
 
       /**
-       *  Make some changes in data to biuld each product
+       *  Make some changes in data to build each product
        */
 
-      appRow = appRow.forEach((dataField, appRowIndex, arr) => {
+      productReqDataRow.forEach((dataField, appRowIndex, arr) => {
         if (rawDataIndex === 0) {
-          if (!stockIndex && actionColumnHeaders.stock.test(dataField)) {
+          if (!stockIndex && requiredProductKeys.stock.test(dataField)) {
             stockIndex = appRowIndex;
           }
-          if (!idIndex && actionColumnHeaders.id.test(dataField)) {
+          if (!idIndex && requiredProductKeys.id.test(dataField)) {
             idIndex = appRowIndex;
           }
-          if (!imageIndex && actionColumnHeaders.image.test(dataField)) {
+          if (!imageIndex && requiredProductKeys.image.test(dataField)) {
             imageIndex = appRowIndex;
           }
           product = null;
-          const validatedKey = validateKey(dataField);
+          const validatedKey = validateKey(dataField, requiredProductKeys);
           productKeymap.push(validatedKey);
           return;
         }
@@ -65,11 +67,7 @@ export async function dataBuilding(...args) {
         if (appRowIndex === imageIndex) {
           let imageID;
           const imageURL = dataField;
-          const initialURLFragments = [
-            'https://drive.google.com/uc?id=',
-            'https://drive.google.com/uc?export=view&id=',
-          ];
-          initialURLFragments.forEach((fragment) => {
+          INITIAL_URL_FRAGMENTS.forEach((fragment) => {
             if (dataField.includes(fragment)) {
               imageID = dataField.slice(fragment.length);
             }
@@ -79,7 +77,7 @@ export async function dataBuilding(...args) {
           /**
            *  We leave unchanged the image URL to display in the application sheet
            */
-          return; // return imageURL;
+          return;
         }
         /**
          *  By default, no changes are applied

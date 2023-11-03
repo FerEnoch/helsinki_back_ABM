@@ -1,8 +1,13 @@
 import { firestoreAccessToken } from '../config/access-tokens';
-import { FIRESTORE_URL } from '../config/firebase-api';
+import { DATABASE_FOLDERS, FIREBASE } from '../config/firebase-api';
 
 export function firestoreDeleteDoc(docFirestoreID) {
-  return UrlFetchApp.fetch(`${FIRESTORE_URL}/${docFirestoreID}`, {
+  const {
+    FIRESTORE: { COMPLETE_URL },
+  } = FIREBASE;
+  const firestoreURL = COMPLETE_URL(DATABASE_FOLDERS.PRODUCTS);
+
+  return UrlFetchApp.fetch(`${firestoreURL}/${docFirestoreID}`, {
     method: 'DELETE',
     muteHttpExceptions: true,
     headers: {

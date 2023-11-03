@@ -7,13 +7,20 @@ import {
   updateProductsInWebAppCache,
 } from '../../features/databaseUpdate/model/updateWebAppCache';
 import { DATABASE_OPERATIONS } from './config/database-operations';
+import { createFirestoreDocument } from './lib/createFirestoreDocument';
+import { updateFirestoreDocument } from './lib/updateFirestoreDocument';
 import { noChangeDataLogger } from './model/noChangeDataLogger';
 
-export const DATABASE_API_ACTIONS = {
+export const PRODUCTS_DATABASE_API_ACTIONS = {
   [DATABASE_OPERATIONS.LEAVE]: noChangeDataLogger,
   [DATABASE_OPERATIONS.ADD]: firebaseDatabaseCreateFiles,
   [DATABASE_OPERATIONS.UPDATE]: firebaseDatabaseUpdateFiles,
   [DATABASE_OPERATIONS.DELETE]: firebaseDatabaseDeleteFiles,
+};
+
+export const INFO_DATABASE_API_ACTIONS = {
+  [DATABASE_OPERATIONS.ADD]: createFirestoreDocument,
+  [DATABASE_OPERATIONS.UPDATE]: updateFirestoreDocument,
 };
 
 export const WEB_APP_API_ACTIONS = {

@@ -1,4 +1,4 @@
-import { actionColumnHeaders, SPREADSHEET } from '../../../entities/sheetData/config/spreadsheet';
+import { COLUMN_HEADERS, SPREADSHEET } from '../../../entities/sheetData/config/spreadsheet';
 
 export function shouldAddImage({ selectedCell, spreadSheet }) {
   const activeSpreadsheet = spreadSheet || SpreadsheetApp.getActiveSpreadsheet();
@@ -13,7 +13,7 @@ export function shouldAddImage({ selectedCell, spreadSheet }) {
 
   const clickedColumn = activeCell.getColumn();
   const selectedColumnHeader = activeSheet.getRange(1, clickedColumn).getValue();
-  const imageHeader = actionColumnHeaders.image;
+  const imageHeader = COLUMN_HEADERS.PRODUCTS.image;
   if (!imageHeader.test(selectedColumnHeader)) return false;
 
   const firstCellValue = activeSheet.getRange(clickedRow, 1).getValue();

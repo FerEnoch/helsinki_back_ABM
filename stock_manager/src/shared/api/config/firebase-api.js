@@ -1,19 +1,37 @@
 import { SERVICE_ACCOUNT } from './service-account';
 
 const FIRESTORE_API = 'https://firestore.googleapis.com/v1beta1';
-const PRODUCTS_DATABASE_FOLDER = 'products';
+// const PRODUCTS_DATABASE_FOLDER = 'products';
 const DATABASE_PATH = `projects/${SERVICE_ACCOUNT.project_id}`;
-export const COMPLETE_RESOURCE_PATH = `${DATABASE_PATH}/databases/(default)/documents/${encodeURIComponent(
-  PRODUCTS_DATABASE_FOLDER
-)}`;
-// projects/stock-backend-123456789/databases/(default)/documents/products/
-export const FIRESTORE_URL = `${FIRESTORE_API}/${COMPLETE_RESOURCE_PATH}`;
+
+// export const COMPLETE_RESOURCE_PATH = `${DATABASE_PATH}/databases/(default)/documents/${encodeURIComponent(
+//   PRODUCTS_DATABASE_FOLDER
+// )}`;
+// export const FIRESTORE_URL = `${FIRESTORE_API}/${COMPLETE_RESOURCE_PATH}`;
 
 const STORAGE_API = `https://www.googleapis.com/upload/storage/v1/b`;
 const STORAGE_BUCKET_NAME = 'stock-backend-392114.appspot.com';
-const IMAGES_FOLDER = 'products_images';
-const QUERY = `o?uploadType=media&name=${encodeURIComponent(IMAGES_FOLDER)}`;
-export const STORAGE_URL = `${STORAGE_API}/${STORAGE_BUCKET_NAME}/${QUERY}`;
+// const IMAGES_FOLDER = 'products_images';
+const QUERY = 'o?uploadType=media&name=';
+// export const STORAGE_URL = `${STORAGE_API}/${STORAGE_BUCKET_NAME}/${QUERY}`;
+
+export const DATABASE_FOLDERS = {
+  PRODUCTS: 'products',
+  INFO: 'info',
+  PAYMENT_METHODS: 'paymentMethods',
+  IMAGES: 'images',
+};
+
+export const FIREBASE = {
+  FIRESTORE: {
+    COMPLETE_URL: (folder) =>
+      `${FIRESTORE_API}/${DATABASE_PATH}/databases/(default)/documents/${encodeURIComponent(folder)}`,
+    RESOURCE_PATH: (folder) => `${DATABASE_PATH}/databases/(default)/documents/${encodeURIComponent(folder)}`,
+  },
+  STORAGE: {
+    COMPLETE_URL: (folder) => `${STORAGE_API}/${STORAGE_BUCKET_NAME}/${QUERY}${encodeURIComponent(folder)}`,
+  },
+};
 
 export const ERROR_MESSAGES = {
   GENERIC: `😕 La aplicación no se pudo actualizar totalmente porque ocurrió algún problema...`,
