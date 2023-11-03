@@ -9,6 +9,8 @@ import { buildHelsinkiInfoContent } from '../lib/buildHelsinkiInfoContent';
 export async function updateAppInfo() {
   const { STOCK_SPREADSHEET_ID, INFO, ACCOUNT, CACHE_SPREADSHEET_ID, INFO_CACHE } = SPREADSHEET;
   const { MAIN_SHEET_INFO: informationHeaders, MAIN_SHEET_ACCOUNT: accountHeaders } = COLUMN_HEADERS;
+  const { ADD, UPDATE } = DATABASE_OPERATIONS;
+  const { INFO: infoFolder, PAYMENT_METHODS } = DATABASE_FOLDERS;
   let message = 'success';
 
   const { rawData: helsinkiInfo } = await fetchSheetData(STOCK_SPREADSHEET_ID, INFO, informationHeaders);
@@ -24,14 +26,14 @@ export async function updateAppInfo() {
   const cacheSheetData = await getCacheSheetData(CACHE_SPREADSHEET_ID, INFO_CACHE, informationHeaders);
 
   const firestoreInfoDocument = {
-    folder: DATABASE_FOLDERS.INFO,
-    docLabel: DATABASE_FOLDERS.INFO,
+    folder: infoFolder,
+    docLabel: infoFolder,
     data: [{ ...compiledInfo }],
   };
 
   const firestorePaymentMethodsDocument = {
-    folder: DATABASE_FOLDERS.PAYMENT_METHODS,
-    docLabel: DATABASE_FOLDERS.PAYMENT_METHODS,
+    folder: PAYMENT_METHODS,
+    docLabel: PAYMENT_METHODS,
     data: [...compiledMPaymentMethods],
   };
 
@@ -39,35 +41,37 @@ export async function updateAppInfo() {
   let dataPaymentMethodsToCache;
 
   if (!cacheSheetData.length) {
-    dataInfoToCache = INFO_DATABASE_API_ACTIONS[DATABASE_OPERATIONS.ADD](firestoreInfoDocument);
-    dataPaymentMethodsToCache = INFO_DATABASE_API_ACTIONS[DATABASE_OPERATIONS.ADD](firestorePaymentMethodsDocument);
-    Logger.log(`CACHE IS EMPTY --> Adding INFO to cache sheet`);
+    Logger.log(`CACHE IS EMPTY --> creating firestore docs: info and paymentMethods `);
+    dataInfoToCache = INFO_DATABASE_API_ACTIONS[ADD](firestoreInfoDocument);
+    dataPaymentMethodsToCache = INFO_DATABASE_API_ACTIONS[ADD](firestorePaymentMethodsDocument);
+    Logger.log(`Adding info and paymentMethods as INFO to cache sheet`);
   } else {
-    Logger.log('cacheSheetData -->\n', cacheSheetData);
     Logger.log(`FOUND CACHE INFO --> Updating Firebase and overwriting info sheet anyway.`);
 
     const [info, paymentMethods] = cacheSheetData;
 
     const infoToUpdate = {
-      folder: DATABASE_FOLDERS.INFO,
-      docLabel: DATABASE_FOLDERS.INFO,
+      folder: infoFolder,
+      docLabel: infoFolder,
       firestoneNameID: info['firestoreName-ID'],
       data: [{ ...compiledInfo }],
     };
-    dataInfoToCache = INFO_DATABASE_API_ACTIONS[DATABASE_OPERATIONS.UPDATE](infoToUpdate);
+    dataInfoToCache = INFO_DATABASE_API_ACTIONS[UPDATE](infoToUpdate);
 
     const paymentMethodsToUpdate = {
-      folder: DATABASE_FOLDERS.PAYMENT_METHODS,
-      docLabel: DATABASE_FOLDERS.PAYMENT_METHODS,
+      folder: PAYMENT_METHODS,
+      docLabel: PAYMENT_METHODS,
       firestoneNameID: paymentMethods['firestoreName-ID'],
       data: [...compiledMPaymentMethods],
     };
-    dataPaymentMethodsToCache = INFO_DATABASE_API_ACTIONS[DATABASE_OPERATIONS.UPDATE](paymentMethodsToUpdate);
+    dataPaymentMethodsToCache = INFO_DATABASE_API_ACTIONS[UPDATE](paymentMethodsToUpdate);
   }
+
   await overwriteCacheSheetData(CACHE_SPREADSHEET_ID, INFO_CACHE, [
     { ...dataInfoToCache },
     { ...dataPaymentMethodsToCache },
   ]);
   Logger.log('DONE!');
+
   return { message };
 }

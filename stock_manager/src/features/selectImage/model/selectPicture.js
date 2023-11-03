@@ -14,5 +14,5 @@ export function selectPicture(id) {
 
   selectedCell.setFontColor('blue');
   selectedCell.setValue(selectedPictureLink);
-  spreadSheet.toast('Imagen de producto agregada 👍', '📲 APP', 4);
+  spreadSheet.toast('Imagen agregada 👍', '📲 APP', 4);
 }
