@@ -1,7 +1,7 @@
 import { getCacheSheetData, overwriteCacheSheetData } from '../../../entities/cache';
 import { COLUMN_HEADERS, SPREADSHEET } from '../../../entities/sheetData/config/spreadsheet';
 import { fetchSheetData } from '../../../entities/sheetData/lib/fetchSheetData';
-import { INFO_DATABASE_API_ACTIONS } from '../../../shared/api';
+import { INFO_DATABASE_API_ACTIONS, WEB_APP_CACHE_UPDATE } from '../../../shared/api';
 import { DATABASE_OPERATIONS } from '../../../shared/api/config/database-operations';
 import { DATABASE_FOLDERS } from '../../../shared/api/config/firebase-api';
 import { buildHelsinkiInfoContent } from '../lib/buildHelsinkiInfoContent';
@@ -10,7 +10,11 @@ export async function updateAppInfo() {
   const { STOCK_SPREADSHEET_ID, INFO, ACCOUNT, CACHE_SPREADSHEET_ID, INFO_CACHE } = SPREADSHEET;
   const { MAIN_SHEET_INFO: informationHeaders, MAIN_SHEET_ACCOUNT: accountHeaders } = COLUMN_HEADERS;
   const { ADD, UPDATE } = DATABASE_OPERATIONS;
-  const { INFO: infoFolder, PAYMENT_METHODS } = DATABASE_FOLDERS;
+  const {
+    CORPORATIVE_INFO: { UPDATE: updateWebApp },
+  } = WEB_APP_CACHE_UPDATE;
+  const { INFO: infoFolder, PAYMENT_METHODS: paymentMethodsFolder } = DATABASE_FOLDERS;
+
   let message = 'success';
 
   const { rawData: helsinkiInfo } = await fetchSheetData(STOCK_SPREADSHEET_ID, INFO, informationHeaders);
@@ -23,8 +27,6 @@ export async function updateAppInfo() {
     throw new Error(message);
   }
 
-  const cacheSheetData = await getCacheSheetData(CACHE_SPREADSHEET_ID, INFO_CACHE, informationHeaders);
-
   const firestoreInfoDocument = {
     folder: infoFolder,
     docLabel: infoFolder,
@@ -32,13 +34,15 @@ export async function updateAppInfo() {
   };
 
   const firestorePaymentMethodsDocument = {
-    folder: PAYMENT_METHODS,
-    docLabel: PAYMENT_METHODS,
+    folder: paymentMethodsFolder,
+    docLabel: paymentMethodsFolder,
     data: [...compiledMPaymentMethods],
   };
 
   let dataInfoToCache;
   let dataPaymentMethodsToCache;
+
+  const cacheSheetData = await getCacheSheetData(CACHE_SPREADSHEET_ID, INFO_CACHE, informationHeaders);
 
   if (!cacheSheetData.length) {
     Logger.log(`CACHE IS EMPTY --> creating firestore docs: info and paymentMethods `);
@@ -57,14 +61,16 @@ export async function updateAppInfo() {
       data: [{ ...compiledInfo }],
     };
     dataInfoToCache = INFO_DATABASE_API_ACTIONS[UPDATE](infoToUpdate);
+    updateWebApp({ label: infoFolder });
 
     const paymentMethodsToUpdate = {
-      folder: PAYMENT_METHODS,
-      docLabel: PAYMENT_METHODS,
+      folder: paymentMethodsFolder,
+      docLabel: paymentMethodsFolder,
       firestoneNameID: paymentMethods['firestoreName-ID'],
       data: [...compiledMPaymentMethods],
     };
     dataPaymentMethodsToCache = INFO_DATABASE_API_ACTIONS[UPDATE](paymentMethodsToUpdate);
+    updateWebApp({ label: paymentMethodsFolder });
   }
 
   await overwriteCacheSheetData(CACHE_SPREADSHEET_ID, INFO_CACHE, [

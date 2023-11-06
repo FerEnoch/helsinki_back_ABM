@@ -25,6 +25,7 @@ import { UI_MESSAGES } from '../../../shared/config/ui-messages';
 export async function databaseController() {
   const { OPERATION_NOT_NECESSARY, OPERATION_SUCCESS } = UI_MESSAGES.MENU.APP_UPDATE.ITEM_1.PROMPT;
   const { STOCK_SPREADSHEET_ID, STOCK, CACHE_SPREADSHEET_ID, PRODUCTS_CACHE } = SPREADSHEET;
+  const { LEAVE, ADD } = DATABASE_OPERATIONS;
   const { PRODUCTS } = COLUMN_HEADERS;
 
   try {
@@ -47,8 +48,8 @@ export async function databaseController() {
     actionContentValues.forEach(({ action, content }) => {
       if (content.length > 0) {
         Logger.log(`PRODUCTS TO ${action}: ${content.length}`);
-        isFirestoreToUpdate = action !== DATABASE_OPERATIONS.LEAVE;
-        isWebAppCacheUpToDate = action !== DATABASE_OPERATIONS.LEAVE;
+        isFirestoreToUpdate = action !== LEAVE;
+        isWebAppCacheUpToDate = action !== LEAVE;
       }
     });
 
@@ -61,11 +62,11 @@ export async function databaseController() {
         /**
          * Create and populate firebase firestore & cloud storage database
          */
-        const uploadedProds = PRODUCTS_DATABASE_API_ACTIONS[DATABASE_OPERATIONS.ADD]([...compiledStockData]);
+        const uploadedProds = PRODUCTS_DATABASE_API_ACTIONS[ADD]([...compiledStockData]);
         /**
          * Update Web App cache
          */
-        const { code, message } = WEB_APP_API_ACTIONS[DATABASE_OPERATIONS.ADD](uploadedProds);
+        const { code, message } = WEB_APP_API_ACTIONS[ADD](uploadedProds);
         isWebAppCacheUpToDate = code === 200 && message === 'Success';
         /**
          * Update local cache sheet
@@ -97,7 +98,7 @@ export async function databaseController() {
                 /**
                  * Update Web App cache
                  */
-                if (action !== DATABASE_OPERATIONS.LEAVE) {
+                if (action !== LEAVE) {
                   const { code, message } = WEB_APP_API_ACTIONS[action](content);
                   isWebAppCacheUpToDate = code === 200 && message === 'Success';
                   if (!isWebAppCacheUpToDate) throw new Error(message, { cause: code });
@@ -135,7 +136,7 @@ export async function databaseController() {
           // );
           firebaseDatabaseDeleteFiles(firestoreCurrentDocs);
 
-          const uploadedProds = PRODUCTS_DATABASE_API_ACTIONS[DATABASE_OPERATIONS.ADD]([...compiledStockData]);
+          const uploadedProds = PRODUCTS_DATABASE_API_ACTIONS[ADD]([...compiledStockData]);
 
           /**
            * Update the local cache sheet

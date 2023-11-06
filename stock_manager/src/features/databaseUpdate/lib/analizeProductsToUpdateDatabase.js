@@ -7,6 +7,8 @@ import { DATABASE_OPERATIONS } from '../../../shared/api/config/database-operati
  * @returns {{action: String, content: Product[]}[]} Products array and the coresponding action to do with them
  */
 export function analizeProductsToUpdateDatabase(newData, cachedData) {
+  const { LEAVE, ADD, UPDATE, DELETE } = DATABASE_OPERATIONS;
+
   const comparisonResult = [];
 
   const toLeaveProdsSet = new Set();
@@ -67,19 +69,19 @@ export function analizeProductsToUpdateDatabase(newData, cachedData) {
   });
 
   comparisonResult.push({
-    action: DATABASE_OPERATIONS.LEAVE,
+    action: LEAVE,
     content: [...toLeaveProdsSet],
   });
   comparisonResult.push({
-    action: DATABASE_OPERATIONS.UPDATE,
+    action: UPDATE,
     content: [...toUpdateProdsSet],
   });
   comparisonResult.push({
-    action: DATABASE_OPERATIONS.ADD,
+    action: ADD,
     content: [...toAddProdsSet],
   });
   comparisonResult.push({
-    action: DATABASE_OPERATIONS.DELETE,
+    action: DELETE,
     content: [...toDeleteFromDatabaseProdsSet],
   });
 

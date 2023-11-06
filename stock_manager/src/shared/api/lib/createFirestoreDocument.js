@@ -3,7 +3,7 @@ import { firestoreAccessToken } from '../config/access-tokens';
 import { ERROR_MESSAGES, FIREBASE } from '../config/firebase-api';
 import { storageCreateFile } from '../model/storageCreateFile';
 
-export function createFirestoreDocument({ docLabel, folder, data = [] }) {
+export function createFirestoreDocument({ docLabel, folder, data: compiledData = [] }) {
   const {
     FIRESTORE: { COMPLETE_URL, RESOURCE_PATH },
   } = FIREBASE;
@@ -17,7 +17,7 @@ export function createFirestoreDocument({ docLabel, folder, data = [] }) {
       muteHttpExceptions: true,
       payload: JSON.stringify({
         fields: {
-          [docLabel]: { stringValue: JSON.stringify([...data]) },
+          [docLabel]: { stringValue: JSON.stringify([...compiledData]) },
         },
       }),
       headers: {
@@ -34,13 +34,13 @@ export function createFirestoreDocument({ docLabel, folder, data = [] }) {
       createdDataToCache = {
         'firestoreName-ID': docID,
         firestoreName: name,
-        data: JSON.stringify([...data]),
+        data: JSON.stringify([...compiledData]),
       };
       Logger.log(`FILE CREATED: ${docID}`);
 
       /**  Only upload images for files that have Its image ID  */
       const [paymentQRMethod] = INITIAL_URL_FRAGMENTS.map((fragment) => {
-        return data.filter((dataObj) => dataObj?.cbu_or_link?.includes(fragment));
+        return compiledData.filter((dataObj) => dataObj?.cbu_or_link?.includes(fragment));
       })
         .filter((result) => result.length)
         .flat();
@@ -51,14 +51,14 @@ export function createFirestoreDocument({ docLabel, folder, data = [] }) {
           const { name: storageFileName } = JSON.parse(storageResponse.getContentText());
           Logger.log(`IMAGE FILE CREATED: ${storageFileName}`);
         } else {
-          Logger.log(`Failed to create image document from file ${data}. Status code: ${statusCode}`);
+          Logger.log(`Failed to create image document from file ${compiledData}. Status code: ${statusCode}`);
         }
       }
     } else if (statusCode === 429) {
       throw new Error(ERROR_MESSAGES.CUOTA_EXCEEDED, { cause: 429 });
     } else {
       Logger.log(`
-      Failed to create document from file ${data}. 
+      Failed to create document from file ${compiledData}. 
       Status code: ${statusCode}
       `);
     }

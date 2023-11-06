@@ -1,19 +1,11 @@
-import { SERVICE_ACCOUNT } from './service-account';
+import { BUCKET_NAME, SERVICE_ACCOUNT } from './service-account';
 
 const FIRESTORE_API = 'https://firestore.googleapis.com/v1beta1';
-// const PRODUCTS_DATABASE_FOLDER = 'products';
 const DATABASE_PATH = `projects/${SERVICE_ACCOUNT.project_id}`;
 
-// export const COMPLETE_RESOURCE_PATH = `${DATABASE_PATH}/databases/(default)/documents/${encodeURIComponent(
-//   PRODUCTS_DATABASE_FOLDER
-// )}`;
-// export const FIRESTORE_URL = `${FIRESTORE_API}/${COMPLETE_RESOURCE_PATH}`;
-
 const STORAGE_API = `https://www.googleapis.com/upload/storage/v1/b`;
-const STORAGE_BUCKET_NAME = 'stock-backend-392114.appspot.com';
-// const IMAGES_FOLDER = 'products_images';
+const STORAGE_BUCKET_NAME = BUCKET_NAME;
 const QUERY = 'o?uploadType=media&name=';
-// export const STORAGE_URL = `${STORAGE_API}/${STORAGE_BUCKET_NAME}/${QUERY}`;
 
 export const DATABASE_FOLDERS = {
   PRODUCTS: 'products',
