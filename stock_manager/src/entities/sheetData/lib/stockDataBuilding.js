@@ -11,6 +11,7 @@ export async function stockDataBuilding(...args) {
     let stockIndex;
     let idIndex;
     let imageIndex;
+    let categoryIndex;
     const productKeymap = [];
     let product = {};
     /**
@@ -32,6 +33,9 @@ export async function stockDataBuilding(...args) {
           if (!idIndex && requiredProductKeys.id.test(dataField)) {
             idIndex = appRowIndex;
           }
+          if (!categoryIndex && requiredProductKeys.category.test(dataField)) {
+            categoryIndex = appRowIndex;
+          }
           if (!imageIndex && requiredProductKeys.image.test(dataField)) {
             imageIndex = appRowIndex;
           }
@@ -41,9 +45,12 @@ export async function stockDataBuilding(...args) {
           return;
         }
         /**
-         * If there is not a valid productID, the product is ignored
+         * If there is not a valid productID, or there's not a valid category,
+         * the product is ignored
          */
-        if (!arr[idIndex].includes('#')) {
+        const hasValidId = arr[idIndex].includes('#');
+        const hasValidCategory = arr[categoryIndex].length > 0;
+        if (!hasValidId || !hasValidCategory) {
           product = null;
           return;
         }
