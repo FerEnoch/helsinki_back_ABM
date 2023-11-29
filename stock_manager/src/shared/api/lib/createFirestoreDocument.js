@@ -1,9 +1,8 @@
-import { INITIAL_URL_FRAGMENTS } from '../../../entities/sheetData/config/spreadsheet';
 import { firestoreAccessToken } from '../config/access-tokens';
 import { ERROR_MESSAGES, FIREBASE } from '../config/firebase-api';
 import { storageCreateFile } from '../model/storageCreateFile';
 
-export function createFirestoreDocument({ docLabel, folder, data: compiledData = [] }) {
+export function createFirestoreDocument({ folder, docLabel, data: compiledData = [] }) {
   const {
     FIRESTORE: { COMPLETE_URL, RESOURCE_PATH },
   } = FIREBASE;
@@ -39,20 +38,18 @@ export function createFirestoreDocument({ docLabel, folder, data: compiledData =
       Logger.log(`FILE CREATED: ${docID}`);
 
       /**  Only upload images for files that have Its image ID  */
-      const [paymentQRMethod] = INITIAL_URL_FRAGMENTS.map((fragment) => {
-        return compiledData.filter((dataObj) => dataObj?.cbu_or_link?.includes(fragment));
-      })
-        .filter((result) => result.length)
-        .flat();
-      if (paymentQRMethod) {
-        const storageResponse = storageCreateFile(paymentQRMethod?.imageID);
-        const storageStatusCode = storageResponse.getResponseCode();
-        if (storageStatusCode === 200) {
-          const { name: storageFileName } = JSON.parse(storageResponse.getContentText());
-          Logger.log(`IMAGE FILE CREATED: ${storageFileName}`);
-        } else {
-          Logger.log(`Failed to create image document from file ${compiledData}. Status code: ${statusCode}`);
-        }
+      const filesWithImage = compiledData.filter((dataField) => dataField?.imageID?.length > 0);
+      if (filesWithImage.length > 0) {
+        filesWithImage.forEach((file) => {
+          const storageResponse = storageCreateFile(file.imageID);
+          const storageStatusCode = storageResponse.getResponseCode();
+          if (storageStatusCode === 200) {
+            const { name: storageFileName } = JSON.parse(storageResponse.getContentText());
+            Logger.log(`IMAGE FILE CREATED: ${storageFileName}`);
+          } else {
+            Logger.log(`Failed to create image document from file ${file}. Status code: ${statusCode}`);
+          }
+        });
       }
     } else if (statusCode === 429) {
       throw new Error(ERROR_MESSAGES.CUOTA_EXCEEDED, { cause: 429 });

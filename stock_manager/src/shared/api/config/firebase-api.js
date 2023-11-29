@@ -9,6 +9,7 @@ const QUERY = 'o?uploadType=media&name=';
 
 export const DATABASE_FOLDERS = {
   PRODUCTS: 'products',
+  PRODUCTS_BY_CATEGORIES: 'products-categories',
   INFO: 'info',
   PAYMENT_METHODS: 'paymentMethods',
   IMAGES: 'images',

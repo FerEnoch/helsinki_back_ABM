@@ -7,6 +7,7 @@ import { shouldAddImage } from './features/selectImage/lib/shouldAddImage';
 import stockUpdate from './features/databaseUpdate';
 import { showSelectionWindow } from './features/selectImage/ui/showSelectionWindow';
 import { infoUpdate } from './features/infoUpdate';
+import { productsUpdate } from './features/prodInfoUpdate';
 
 global.onOpen = onOpen;
 global.onEdit = onEdit;
@@ -17,3 +18,4 @@ global.selectPicture = selectPicture;
 global.shouldAddImage = shouldAddImage;
 global.stockUpdate = stockUpdate;
 global.infoUpdate = infoUpdate;
+global.productsUpdate = productsUpdate;

@@ -7,7 +7,7 @@ import { DATABASE_OPERATIONS } from '../../../shared/api/config/database-operati
  * @returns {{action: String, content: Product[]}[]} Products array and the coresponding action to do with them
  */
 export function analizeProductsToUpdateDatabase(newData, cachedData) {
-  const { LEAVE, ADD, UPDATE, DELETE } = DATABASE_OPERATIONS;
+  const { LEAVE, CREATE, UPDATE, DELETE } = DATABASE_OPERATIONS;
 
   const comparisonResult = [];
 
@@ -77,7 +77,7 @@ export function analizeProductsToUpdateDatabase(newData, cachedData) {
     content: [...toUpdateProdsSet],
   });
   comparisonResult.push({
-    action: ADD,
+    action: CREATE,
     content: [...toAddProdsSet],
   });
   comparisonResult.push({

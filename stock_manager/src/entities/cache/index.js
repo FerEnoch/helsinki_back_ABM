@@ -5,8 +5,8 @@ import { toCacheSheetDataBuilding } from '../sheetData/lib/toCacheSheetDataBuild
  * Gets current cache sheet data
  * @return {Promise<Value[]>} Array of values (objects) that are in the given cache sheet
  */
-export async function getCacheSheetData(sheetID, sheetName, reqHeaders) {
-  const { rawData: cachedDataArrays } = await fetchSheetData(sheetID, sheetName, reqHeaders);
+export async function getCacheSheetData(...args) {
+  const { rawData: cachedDataArrays } = await fetchSheetData(...args);
   if (!cachedDataArrays?.length) return [];
   const cacheValues = [];
   const headers = [];

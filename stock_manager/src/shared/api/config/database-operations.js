@@ -1,6 +1,6 @@
 export const DATABASE_OPERATIONS = {
-  LEAVE: 'LEAVE',
+  CREATE: 'CREATE',
   UPDATE: 'UPDATE',
-  ADD: 'ADD',
   DELETE: 'DELETE',
+  LEAVE: 'LEAVE',
 };

@@ -7,6 +7,7 @@
 export async function fetchSheetData(spreadsheetID, sheetName, reqColumns) {
   const originSpreadsheet = SpreadsheetApp.openById(spreadsheetID);
   const originDataSheet = originSpreadsheet.getSheetByName(sheetName);
+
   const headerIndexes = [];
   let rawData = [];
 
@@ -16,10 +17,12 @@ export async function fetchSheetData(spreadsheetID, sheetName, reqColumns) {
 
   if (dataFromSheet.length > 0) {
     rawData = dataFromSheet;
-    Object.values(reqColumns).forEach((actionHeader) => {
-      const actionHeaderIndex = rawData[0].findIndex((rawHeader) => rawHeader && actionHeader.test(rawHeader));
-      if (actionHeaderIndex !== -1) headerIndexes.push(actionHeaderIndex);
-    });
+    if (reqColumns) {
+      Object.values(reqColumns).forEach((actionHeader) => {
+        const actionHeaderIndex = rawData[0].findIndex((rawHeader) => rawHeader && actionHeader.test(rawHeader));
+        if (actionHeaderIndex !== -1) headerIndexes.push(actionHeaderIndex);
+      });
+    }
   }
 
   return { rawData, headerIndexes };

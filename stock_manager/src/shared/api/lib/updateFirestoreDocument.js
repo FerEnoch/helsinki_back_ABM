@@ -1,9 +1,8 @@
-import { INITIAL_URL_FRAGMENTS } from '../../../entities/sheetData/config/spreadsheet';
 import { firestoreAccessToken } from '../config/access-tokens';
 import { ERROR_MESSAGES, FIREBASE } from '../config/firebase-api';
 import { storageCreateFile } from '../model/storageCreateFile';
 
-export function updateFirestoreDocument({ folder, firestoneNameID, docLabel, data = [] }) {
+export function updateFirestoreDocument({ folder, firestoneNameID, docLabel, data: compiledData = [] }) {
   const {
     FIRESTORE: { COMPLETE_URL, RESOURCE_PATH },
   } = FIREBASE;
@@ -18,7 +17,7 @@ export function updateFirestoreDocument({ folder, firestoneNameID, docLabel, dat
       muteHttpExceptions: true,
       payload: JSON.stringify({
         fields: {
-          [docLabel]: { stringValue: JSON.stringify(data) },
+          [docLabel]: { stringValue: JSON.stringify(compiledData) },
         },
       }),
       headers: {
@@ -34,30 +33,28 @@ export function updateFirestoreDocument({ folder, firestoneNameID, docLabel, dat
       updatedValueToCache = {
         'firestoreName-ID': docID,
         firestoreName: name,
-        data: JSON.stringify(data),
+        data: JSON.stringify(compiledData),
       };
       Logger.log(`FILE UPDATED: ${docID}`);
 
       /**  Only upload images for files that have Its image ID  */
-      const [paymentQRMethod] = INITIAL_URL_FRAGMENTS.map((fragment) => {
-        return data.filter((dataObj) => dataObj?.cbu_or_link?.includes(fragment));
-      })
-        .filter((result) => result.length)
-        .flat();
-      if (paymentQRMethod) {
-        const storageResponse = storageCreateFile(paymentQRMethod?.imageID);
-        const storageStatusCode = storageResponse.getResponseCode();
-        if (storageStatusCode === 200) {
-          const { name: storageFileName } = JSON.parse(storageResponse.getContentText());
-          Logger.log(`IMAGE FILE UPDATED: ${storageFileName}`);
-        } else {
-          Logger.log(`Failed to update image document from file ${data}. Status code: ${statusCode}`);
-        }
+      const filesWithImage = compiledData.filter((dataField) => dataField?.imageID?.length > 0);
+      if (filesWithImage.length > 0) {
+        filesWithImage.forEach((file) => {
+          const storageResponse = storageCreateFile(file?.imageID);
+          const storageStatusCode = storageResponse.getResponseCode();
+          if (storageStatusCode === 200) {
+            const { name: storageFileName } = JSON.parse(storageResponse.getContentText());
+            Logger.log(`IMAGE FILE UPDATED: ${storageFileName}`);
+          } else {
+            Logger.log(`Failed to update image document from file ${file}. Status code: ${statusCode}`);
+          }
+        });
       }
     } else if (statusCode === 429) {
       throw new Error(ERROR_MESSAGES.CUOTA_EXCEEDED, { cause: 429 });
     } else {
-      Logger.log(`Failed to update document from file ${data}. Status code: ${statusCode}`);
+      Logger.log(`Failed to update document from file ${compiledData}. Status code: ${statusCode}`);
     }
   } catch (e) {
     console.error(`Something happened... some products were NOT UPDATED successfully.`, e.message); /* eslint-disable-line */

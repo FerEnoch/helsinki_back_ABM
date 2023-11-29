@@ -18,5 +18,8 @@ export async function toCacheSheetDataBuilding(dataToBuildCache) {
     });
     productsData.push(productArr);
   });
-  return [[...headers], ...productsData];
+
+  const builtRow = [[...headers], ...productsData];
+
+  return builtRow;
 }

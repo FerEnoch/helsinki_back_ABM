@@ -25,12 +25,12 @@ import { UI_MESSAGES } from '../../../shared/config/ui-messages';
 export async function databaseController() {
   const { OPERATION_NOT_NECESSARY, OPERATION_SUCCESS } = UI_MESSAGES.MENU.APP_UPDATE.ITEM_1.PROMPT;
   const { STOCK_SPREADSHEET_ID, STOCK, CACHE_SPREADSHEET_ID, PRODUCTS_CACHE } = SPREADSHEET;
-  const { LEAVE, ADD } = DATABASE_OPERATIONS;
-  const { PRODUCTS } = COLUMN_HEADERS;
+  const { LEAVE, CREATE } = DATABASE_OPERATIONS;
+  const { PRODUCTS: requiredProductKeys } = COLUMN_HEADERS;
 
   try {
     const compiledStockData = await stockDataBuilding(STOCK_SPREADSHEET_ID, STOCK);
-    const cacheSheetData = await getCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_CACHE, PRODUCTS);
+    const cacheSheetData = await getCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_CACHE, requiredProductKeys);
 
     if (!compiledStockData.length) {
       throw new Error('Unable to build stock data to update firestore database');
@@ -60,13 +60,13 @@ export async function databaseController() {
         Logger.log('FIRESTORE IS EMPTY --->> Updating from stock products, creating files...');
         isFirestoreToUpdate = true;
         /**
-         * Create and populate firebase firestore & cloud storage database
+         * Create and populate firebase firestore & storage database
          */
-        const uploadedProds = PRODUCTS_DATABASE_API_ACTIONS[ADD]([...compiledStockData]);
+        const uploadedProds = PRODUCTS_DATABASE_API_ACTIONS[CREATE]([...compiledStockData]);
         /**
          * Update Web App cache
          */
-        const { code, message } = WEB_APP_API_ACTIONS[ADD](uploadedProds);
+        const { code, message } = WEB_APP_API_ACTIONS[CREATE](uploadedProds);
         isWebAppCacheUpToDate = code === 200 && message === 'Success';
         /**
          * Update local cache sheet
@@ -136,7 +136,7 @@ export async function databaseController() {
           // );
           firebaseDatabaseDeleteFiles(firestoreCurrentDocs);
 
-          const uploadedProds = PRODUCTS_DATABASE_API_ACTIONS[ADD]([...compiledStockData]);
+          const uploadedProds = PRODUCTS_DATABASE_API_ACTIONS[CREATE]([...compiledStockData]);
 
           /**
            * Update the local cache sheet

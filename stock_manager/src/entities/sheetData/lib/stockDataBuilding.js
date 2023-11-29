@@ -2,6 +2,11 @@ import { fetchSheetData } from './fetchSheetData';
 import { COLUMN_HEADERS, INITIAL_URL_FRAGMENTS } from '../config/spreadsheet';
 import { validateKey } from '../../../features/databaseUpdate/lib/validateKey';
 
+/**
+ *
+ * @param  {...any} args Target SpreadsheetID and sheet name
+ * @returns {product[]} Array of products
+ */
 export async function stockDataBuilding(...args) {
   const { PRODUCTS: requiredProductKeys } = COLUMN_HEADERS;
 

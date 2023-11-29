@@ -12,17 +12,26 @@ import { createFirestoreDocument } from './lib/createFirestoreDocument';
 import { updateFirestoreDocument } from './lib/updateFirestoreDocument';
 import { noChangeDataLogger } from './model/noChangeDataLogger';
 
-const { LEAVE, ADD, UPDATE, DELETE } = DATABASE_OPERATIONS;
+const { LEAVE, CREATE, UPDATE, DELETE } = DATABASE_OPERATIONS;
 
 export const PRODUCTS_DATABASE_API_ACTIONS = {
   [LEAVE]: noChangeDataLogger,
-  [ADD]: firebaseDatabaseCreateFiles,
+  [CREATE]: firebaseDatabaseCreateFiles,
   [UPDATE]: firebaseDatabaseUpdateFiles,
   [DELETE]: firebaseDatabaseDeleteFiles,
 };
 
-export const INFO_DATABASE_API_ACTIONS = {
-  [ADD]: createFirestoreDocument,
+export const WEB_APP_API_ACTIONS = {
+  [CREATE]: addProductsToWebAppCache,
+  [UPDATE]: updateProductsInWebAppCache,
+  [DELETE]: deleteProductsInWebAppCache,
+};
+
+/**
+ *  New version of the API
+ */
+export const DATABASE_API_ACTIONS = {
+  [CREATE]: createFirestoreDocument,
   [UPDATE]: updateFirestoreDocument,
 };
 
@@ -30,10 +39,4 @@ export const WEB_APP_CACHE_UPDATE = {
   CORPORATIVE_INFO: {
     [UPDATE]: updateCorporativeInfoInWebAppCache,
   },
-};
-
-export const WEB_APP_API_ACTIONS = {
-  [ADD]: addProductsToWebAppCache,
-  [UPDATE]: updateProductsInWebAppCache,
-  [DELETE]: deleteProductsInWebAppCache,
 };
