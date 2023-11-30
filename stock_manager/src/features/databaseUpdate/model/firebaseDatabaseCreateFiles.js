@@ -32,7 +32,7 @@ export function firebaseDatabaseCreateFiles(files = []) {
           ...file,
         };
         createdFiles.push(dataToCache);
-        Logger.log(`FILE CREATED: ${docID} --> ${file.id}`);
+        Logger.log(`DOCUMENT CREATED: ${docID} --> ${file.id}`);
         /**  Only upload images for files that have Its image ID  */
         if (file.imageID) {
           storageCreateFile(file.imageID);

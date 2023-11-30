@@ -1,6 +1,6 @@
 import { firestoreAccessToken } from '../config/access-tokens';
 import { ERROR_MESSAGES, FIREBASE } from '../config/firebase-api';
-import { storageCreateFile } from '../model/storageCreateFile';
+import { handleImagesStorage } from './handleImagesStorage';
 
 export function updateFirestoreDocument({ folder, firestoneNameID, docLabel, data: compiledData = [] }) {
   const {
@@ -35,26 +35,12 @@ export function updateFirestoreDocument({ folder, firestoneNameID, docLabel, dat
         firestoreName: name,
         data: JSON.stringify(compiledData),
       };
-      Logger.log(`FILE UPDATED: ${docID}`);
-
-      /**  Only upload images for files that have Its image ID  */
-      const filesWithImage = compiledData.filter((dataField) => dataField?.imageID?.length > 0);
-      if (filesWithImage.length > 0) {
-        filesWithImage.forEach((file) => {
-          const storageResponse = storageCreateFile(file?.imageID);
-          const storageStatusCode = storageResponse.getResponseCode();
-          if (storageStatusCode === 200) {
-            const { name: storageFileName } = JSON.parse(storageResponse.getContentText());
-            Logger.log(`IMAGE FILE UPDATED: ${storageFileName}`);
-          } else {
-            Logger.log(`Failed to update image document from file ${file}. Status code: ${statusCode}`);
-          }
-        });
-      }
+      Logger.log(`DOCUMENT UPDATED: ${docID}`);
+      handleImagesStorage(compiledData);
     } else if (statusCode === 429) {
       throw new Error(ERROR_MESSAGES.CUOTA_EXCEEDED, { cause: 429 });
     } else {
-      Logger.log(`Failed to update document from file ${compiledData}. Status code: ${statusCode}`);
+      Logger.log(`Failed to update document ${docLabel}. Status code: ${statusCode}`);
     }
   } catch (e) {
     console.error(`Something happened... some products were NOT UPDATED successfully.`, e.message); /* eslint-disable-line */

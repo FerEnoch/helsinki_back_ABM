@@ -3,7 +3,7 @@ import { firestoreDeleteDoc } from '../../../shared/api/model/firestoreDeleteDoc
 
 /**
  * Deletes firebase firestore documents (NOT their corresponding images files in storage)
- * @param {Array} products Names of the products to delete from firebase database
+ * @param {Array} products Documents to delete from firebase database
  * @returns {void}
  */
 export function firebaseDatabaseDeleteFiles(products = []) {
@@ -14,7 +14,7 @@ export function firebaseDatabaseDeleteFiles(products = []) {
       const statusCode = firebaseResponse.getResponseCode();
 
       if (statusCode === 200) {
-        Logger.log('Document deleted successfully.');
+        Logger.log('Product deleted successfully.');
       } else if (statusCode === 429) {
         throw new Error(ERROR_MESSAGES.CUOTA_EXCEEDED, { cause: 429 });
       } else {

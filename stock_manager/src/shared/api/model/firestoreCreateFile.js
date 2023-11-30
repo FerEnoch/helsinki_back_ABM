@@ -25,13 +25,13 @@ export function firestoreCreateFile({
     payload: JSON.stringify({
       fields: {
         id: { stringValue: id },
-        category: { stringValue: category },
-        type: { stringValue: type },
-        name: { stringValue: name },
+        category: { stringValue: category.toString() || `${category}` },
+        type: { stringValue: type.toString() || `${type}` },
+        name: { stringValue: name.toString() || `${name}` },
         description: { stringValue: description },
         imageURL: { stringValue: imageURL },
         imageID: { stringValue: imageID },
-        destillery: { stringValue: destillery },
+        destillery: { stringValue: destillery.toString() || `${destillery}` },
         alcohol: { stringValue: alcohol.toString() || `${alcohol}` },
         stock: { booleanValue: stock },
         price: { stringValue: price.toString() || `${price}` },

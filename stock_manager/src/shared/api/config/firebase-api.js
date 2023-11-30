@@ -4,6 +4,7 @@ const FIRESTORE_API = 'https://firestore.googleapis.com/v1beta1';
 const DATABASE_PATH = `projects/${SERVICE_ACCOUNT.project_id}`;
 
 const STORAGE_API = `https://www.googleapis.com/upload/storage/v1/b`;
+const STORAGE_METADATA = `https://firebasestorage.googleapis.com/v0/b`;
 const STORAGE_BUCKET_NAME = BUCKET_NAME;
 const QUERY = 'o?uploadType=media&name=';
 
@@ -23,6 +24,8 @@ export const FIREBASE = {
   },
   STORAGE: {
     COMPLETE_URL: (folder) => `${STORAGE_API}/${STORAGE_BUCKET_NAME}/${QUERY}${encodeURIComponent(folder)}`,
+    METADATA_URL: (folder, fileName) =>
+      `${STORAGE_METADATA}/${STORAGE_BUCKET_NAME}/o/${encodeURIComponent(`${folder}/${fileName}`)}`,
   },
 };
 

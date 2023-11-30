@@ -22,7 +22,8 @@ export async function updateCategories(modifiedCategories) {
   modifiedCategories.forEach((categoryToUpdate) => {
     if (!currentCategoryMap.has(categoryToUpdate)) return;
     const categoryDataToUpdate = compiledStockData.filter(({ category }) => category === categoryToUpdate);
-    const cacheCategoryData = cacheSheetData.find((cacheData) => cacheData.category === categoryToUpdate);
+    const cacheCategoryData = cacheSheetData.find(({ category }) => category === categoryToUpdate);
+    if (!cacheCategoryData) return;
 
     const completeDataToUpdate = {
       folder: productsFolder,
@@ -31,7 +32,7 @@ export async function updateCategories(modifiedCategories) {
       data: [...categoryDataToUpdate],
     };
 
-    Logger.log(`Updating database category: ${categoryToUpdate}`);
+    Logger.log(`Updating database: ${categoryToUpdate}`);
     const categoryDataToCache = DATABASE_API_ACTIONS[UPDATE](completeDataToUpdate);
     firestoreProductsUpdated.push({
       category: categoryToUpdate,

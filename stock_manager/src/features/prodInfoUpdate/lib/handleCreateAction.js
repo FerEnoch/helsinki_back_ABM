@@ -26,11 +26,11 @@ export async function handleCreateAction(modifiedCategories, modifiedProducts) {
   const existingCatModifiedProds = modifiedProducts.filter((modProd) => cacheCategories.has(modProd.category));
 
   if (existingCatModifiedProds.length > 0) {
-    // se crea un producto dentro de una categoría existente. Activa el UPDATE:
+    // se crea un producto dentro de una categoría existente. Activa UPDATE action:
     Logger.log(`New product/s added to existing categories - updating category...`);
     const result = await updateCategories([...modifiedCategories]);
     operationResult.push(result);
   }
-  console.log('handleCreateAction -> operationResult', operationResult.flat());
+
   return operationResult.flat();
 }

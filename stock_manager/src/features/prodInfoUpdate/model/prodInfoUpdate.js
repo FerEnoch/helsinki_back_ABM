@@ -1,4 +1,4 @@
-import { getCacheSheetData, overwriteCacheSheetData } from '../../../entities/cache';
+import { getCacheSheetData } from '../../../entities/cache';
 import { SPREADSHEET } from '../../../entities/sheetData/config/spreadsheet';
 import { stockDataBuilding } from '../../../entities/sheetData/lib/stockDataBuilding';
 import { DATABASE_API_ACTIONS } from '../../../shared/api';
@@ -7,14 +7,14 @@ import { DATABASE_FOLDERS } from '../../../shared/api/config/firebase-api';
 import { analizeProductsToUpdateDatabase } from '../../databaseUpdate/lib/analizeProductsToUpdateDatabase';
 import { getProdsByCategories } from '../lib/getProdsByCategories';
 import { getProdsFromCache } from '../lib/getProdsFromCache';
-import { handleCreateAction } from '../lib/handleCreateAction';
+import { PROD_CATEGORY_CRUD_CONTROLLER } from './crudController';
 
 export async function prodInfoUpdate() {
   try {
     const { STOCK_SPREADSHEET_ID, STOCK_TESTING /* , STOCK */, CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE } =
       SPREADSHEET;
     const { PRODUCTS_BY_CATEGORIES: productsFolder } = DATABASE_FOLDERS;
-    const { CREATE, UPDATE, DELETE, LEAVE } = DATABASE_OPERATIONS;
+    const { CREATE, LEAVE } = DATABASE_OPERATIONS;
 
     let message = 'success';
     let isNeededToUpdateProductsInfo;
@@ -53,14 +53,16 @@ export async function prodInfoUpdate() {
 
       const cacheProducts = getProdsFromCache(cacheSheetData);
       const actionsByProduct = analizeProductsToUpdateDatabase(compiledStockData, cacheProducts);
-
       Logger.log(`ANALIZED PRODUCTS: ${compiledStockData.length}`);
       const actionsByCategory = actionsByProduct.map(({ action, content }) => {
         const categorySet = new Set();
         if (content.length > 0) {
           isNeededToUpdateProductsInfo = action !== LEAVE;
           if (!isNeededToUpdateProductsInfo) return null;
-          content.forEach((prod) => categorySet.add(prod.category));
+          content.forEach((prod) => {
+            if (Object.hasOwn(prod, 'firestoreName-ID')) delete prod['firestoreName-ID']; /* eslint-disable-line */
+            categorySet.add(prod.category);
+          });
           Logger.log(`ACTION: ${action} ${content.length} PRODUCTS - CATEGORIES: ${[...categorySet]}`);
           return [action, [...categorySet], [...content]];
         }
@@ -68,67 +70,66 @@ export async function prodInfoUpdate() {
       });
 
       Logger.log('Executing actions...');
-      actionsByCategory.forEach((analizingProcessResult) => {
-        if (!analizingProcessResult) return;
-        const [action, modifiedCategories, modifiedProducts] = analizingProcessResult;
+      const getOperationdResult = Promise.all(
+        actionsByCategory.map(async (analizingProcessResult) => {
+          if (!analizingProcessResult) return;
+          const [action, modifiedCategories, modifiedProducts] = analizingProcessResult;
 
-        try {
-          switch (action) {
-            case CREATE:
-              handleCreateAction([...modifiedCategories], [...modifiedProducts]).then(
-                firestoreProductsInfoToCache.push
-              );
-              break;
-            case UPDATE:
-              // se actualiza un producto dentro de una categoría
-              break;
-            case DELETE:
-              // se borra una categoría entera
-              // se borra un producto dentro de una categoría
-              break;
-            default:
-          }
-          /**
-           * Update firestore old way
-           */
-          // const operationResultProducts = PRODUCTS_DATABASE_API_ACTIONS[action](content);
-          // operationResultProducts?.forEach((updatedProd) => {
-          //   if (updatedProd) {
-          //     finallyUpdatedProducts.push(updatedProd);
-          //   }
-          // });
-          /**
-           * Update Web App cache
-           */
-          // if (action !== LEAVE) {
-          //   const { code, message } = WEB_APP_API_ACTIONS[action](content);
-          //   isWebAppCacheUpToDate = code === 200 && message === 'Success';
-          //   if (!isWebAppCacheUpToDate) throw new Error(message, { cause: code });
-          // }
-          /**
-           *  new way
-           */
-          // const infoToUpdate = {
-          //   folder: infoFolder,
-          //   docLabel: infoFolder,
-          //   firestoneNameID: info['firestoreName-ID'],
-          //   data: [{ ...compiledInfo }],
-          // };
-          // dataInfoToCache = DATABASE_API_ACTIONS[UPDATE](infoToUpdate);
-          // updateWebApp({ label: infoFolder });
-        } catch (e) {
-          // hasWebAppBeenUpdatedSuccessfully = false;
+          try {
+            // case CREATE: done
+            // case UPDATE: done
+            // case DELETE:
+            const operationResult = await PROD_CATEGORY_CRUD_CONTROLLER[action](
+              [...modifiedCategories],
+              [...modifiedProducts]
+            );
+            firestoreProductsInfoToCache.push(operationResult);
+
+            /** **************************************************
+             * Update firestore old way
+             */
+            // const operationResultProducts = PRODUCTS_DATABASE_API_ACTIONS[action](content);
+            // operationResultProducts?.forEach((updatedProd) => {
+            //   if (updatedProd) {
+            //     finallyUpdatedProducts.push(updatedProd);
+            //   }
+            // });
+            /**
+             * Update Web App cache
+             */
+            // if (action !== LEAVE) {
+            //   const { code, message } = WEB_APP_API_ACTIONS[action](content);
+            //   isWebAppCacheUpToDate = code === 200 && message === 'Success';
+            //   if (!isWebAppCacheUpToDate) throw new Error(message, { cause: code });
+            // }
+            /**
+             *  new way
+             */
+            // const infoToUpdate = {
+            //   folder: infoFolder,
+            //   docLabel: infoFolder,
+            //   firestoneNameID: info['firestoreName-ID'],
+            //   data: [{ ...compiledInfo }],
+            // };
+            // dataInfoToCache = DATABASE_API_ACTIONS[UPDATE](infoToUpdate);
+            // updateWebApp({ label: infoFolder });
+          } catch (e) {
+            // hasWebAppBeenUpdatedSuccessfully = false;
               console.error( /* eslint-disable-line */
-            `***/**** Something happened with ${action} action with this categories: ${modifiedCategories}`
-          );
-        }
-      });
+              `***/**** Something happened with ${action} action with this categories: ${modifiedCategories}`,
+              e.message
+            );
+          }
+        })
+      );
+      await getOperationdResult;
+      console.log('Final result to cache ->', firestoreProductsInfoToCache);
+      /**
+       * Intentar: no overwrite toda la cache sheet, sino hacerlo solo con las categorías modificadas
+       */
+      // await overwriteCacheSheetData(CACHE_SPREADSHEET_ID, INFO_CACHE, [...firestoreProductsInfoToCache]);
+      Logger.log('DONE!');
     }
-
-    console.log('final result to cache ->', firestoreProductsInfoToCache);
-    // await overwriteCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE, [...firestoreProductsInfoToCache]);
-    Logger.log('DONE!');
-
     return { message, isNeededToUpdateProductsInfo, totalProducts: compiledStockData.length };
   } catch (e) {
     if (e.cause === 429) {
