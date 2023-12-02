@@ -17,7 +17,7 @@ export async function updateCategories(modifiedCategories) {
 
   const cacheSheetData = await getCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE);
 
-  const firestoreProductsUpdated = [];
+  const updatedCategories = [];
 
   modifiedCategories.forEach((categoryToUpdate) => {
     if (!currentCategoryMap.has(categoryToUpdate)) return;
@@ -29,16 +29,15 @@ export async function updateCategories(modifiedCategories) {
       folder: productsFolder,
       docLabel: categoryToUpdate,
       firestoneNameID: cacheCategoryData['firestoreName-ID'],
-      data: [...categoryDataToUpdate],
+      data: [...categoryDataToUpdate], // Important that 'data' stays last
     };
 
     Logger.log(`Updating database: ${categoryToUpdate}`);
     const categoryDataToCache = DATABASE_API_ACTIONS[UPDATE](completeDataToUpdate);
-    firestoreProductsUpdated.push({
-      category: categoryToUpdate,
+    updatedCategories.push({
+      category: categoryToUpdate, // Important that 'category' stays first
       ...categoryDataToCache,
     });
   });
-
-  return [...firestoreProductsUpdated];
+  return [...updatedCategories];
 }

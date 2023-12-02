@@ -1,3 +1,4 @@
+import { cacheOpResults } from './cacheOpResults';
 import { updateCategories } from './updateCategories';
 
 export async function handleUpdateAction(modifiedCategories) {
@@ -7,5 +8,8 @@ export async function handleUpdateAction(modifiedCategories) {
   const result = await updateCategories([...modifiedCategories]);
   result.forEach((updatedCat) => categoriesToCache.push(updatedCat));
 
-  return [...categoriesToCache].flat();
+  Logger.log('Caching categories with UPDATE action...');
+  await cacheOpResults(categoriesToCache.flat());
+
+  // return categoriesToCache.flat();
 }

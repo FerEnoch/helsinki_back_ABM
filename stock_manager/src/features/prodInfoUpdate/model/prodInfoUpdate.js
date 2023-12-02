@@ -1,4 +1,4 @@
-import { getCacheSheetData } from '../../../entities/cache';
+import { getCacheSheetData, overwriteCacheSheetData } from '../../../entities/cache';
 import { SPREADSHEET } from '../../../entities/sheetData/config/spreadsheet';
 import { stockDataBuilding } from '../../../entities/sheetData/lib/stockDataBuilding';
 import { DATABASE_API_ACTIONS } from '../../../shared/api';
@@ -18,10 +18,11 @@ export async function prodInfoUpdate() {
 
     let message = 'success';
     let isNeededToUpdateProductsInfo;
+    let getOperationdResult;
 
     const compiledStockData = await stockDataBuilding(STOCK_SPREADSHEET_ID, STOCK_TESTING);
     const currentCategoryMap = getProdsByCategories(compiledStockData);
-    Logger.log(`Total found categories --> ${currentCategoryMap.size}`); // -> 12
+    Logger.log(`Total found categories --> ${currentCategoryMap.size}`); // -> 13
 
     if (!currentCategoryMap) {
       message = 'Unable to build products by categories to update firestore database';
@@ -29,11 +30,15 @@ export async function prodInfoUpdate() {
     }
 
     const cacheSheetData = await getCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE);
-    const firestoreProductsInfoToCache = [];
 
     if (!cacheSheetData.length) {
+      const firestoreProductsInfoToCache = [];
       isNeededToUpdateProductsInfo = true;
       Logger.log(`CACHE IS EMPTY --> creating firestore docs: products by categories`);
+      /**
+       * Es la acción inicial: no hay cache, es decir, es la primera carga.
+       * borrar todo firebase por precaución, para actualizar todo junto
+       */
       [...currentCategoryMap.entries()].forEach(([category, prods]) => {
         Logger.log(`Creating firestore category: ${category}`);
         const firestoreProductsDocument = {
@@ -48,11 +53,13 @@ export async function prodInfoUpdate() {
         });
       });
       Logger.log(`Adding products to cache sheet`);
+      await overwriteCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE, [...firestoreProductsInfoToCache]);
     } else {
-      Logger.log(`FOUND CACHE INFO --> Updating Firebase and overwriting info sheet anyway.`);
+      Logger.log(`FOUND CACHE INFO --> Updating Firebase and cache sheet.`);
 
       const cacheProducts = getProdsFromCache(cacheSheetData);
       const actionsByProduct = analizeProductsToUpdateDatabase(compiledStockData, cacheProducts);
+
       Logger.log(`ANALIZED PRODUCTS: ${compiledStockData.length}`);
       const actionsByCategory = actionsByProduct.map(({ action, content }) => {
         const categorySet = new Set();
@@ -70,49 +77,17 @@ export async function prodInfoUpdate() {
       });
 
       Logger.log('Executing actions...');
-      const getOperationdResult = Promise.all(
+      getOperationdResult = Promise.all(
         actionsByCategory.map(async (analizingProcessResult) => {
           if (!analizingProcessResult) return;
           const [action, modifiedCategories, modifiedProducts] = analizingProcessResult;
 
           try {
-            // case CREATE: done
-            // case UPDATE: done
+            // case CREATE:
+            // case UPDATE:
             // case DELETE:
-            const operationResult = await PROD_CATEGORY_CRUD_CONTROLLER[action](
-              [...modifiedCategories],
-              [...modifiedProducts]
-            );
-            firestoreProductsInfoToCache.push(operationResult);
-
-            /** **************************************************
-             * Update firestore old way
-             */
-            // const operationResultProducts = PRODUCTS_DATABASE_API_ACTIONS[action](content);
-            // operationResultProducts?.forEach((updatedProd) => {
-            //   if (updatedProd) {
-            //     finallyUpdatedProducts.push(updatedProd);
-            //   }
-            // });
-            /**
-             * Update Web App cache
-             */
-            // if (action !== LEAVE) {
-            //   const { code, message } = WEB_APP_API_ACTIONS[action](content);
-            //   isWebAppCacheUpToDate = code === 200 && message === 'Success';
-            //   if (!isWebAppCacheUpToDate) throw new Error(message, { cause: code });
-            // }
-            /**
-             *  new way
-             */
-            // const infoToUpdate = {
-            //   folder: infoFolder,
-            //   docLabel: infoFolder,
-            //   firestoneNameID: info['firestoreName-ID'],
-            //   data: [{ ...compiledInfo }],
-            // };
-            // dataInfoToCache = DATABASE_API_ACTIONS[UPDATE](infoToUpdate);
-            // updateWebApp({ label: infoFolder });
+            // const operationResult =
+            await PROD_CATEGORY_CRUD_CONTROLLER[action]([...modifiedCategories], [...modifiedProducts]);
           } catch (e) {
             // hasWebAppBeenUpdatedSuccessfully = false;
               console.error( /* eslint-disable-line */
@@ -122,14 +97,10 @@ export async function prodInfoUpdate() {
           }
         })
       );
-      await getOperationdResult;
-      console.log('Final result to cache ->', firestoreProductsInfoToCache);
-      /**
-       * Intentar: no overwrite toda la cache sheet, sino hacerlo solo con las categorías modificadas
-       */
-      // await overwriteCacheSheetData(CACHE_SPREADSHEET_ID, INFO_CACHE, [...firestoreProductsInfoToCache]);
-      Logger.log('DONE!');
+      // console.log('Final result to cache ->', firestoreProductsInfoToCache);
     }
+    await getOperationdResult;
+    Logger.log('DONE!');
     return { message, isNeededToUpdateProductsInfo, totalProducts: compiledStockData.length };
   } catch (e) {
     if (e.cause === 429) {

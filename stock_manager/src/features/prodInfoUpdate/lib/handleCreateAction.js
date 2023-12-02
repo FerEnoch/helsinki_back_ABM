@@ -1,5 +1,6 @@
 import { getCacheSheetData } from '../../../entities/cache';
 import { SPREADSHEET } from '../../../entities/sheetData/config/spreadsheet';
+import { cacheOpResults } from './cacheOpResults';
 import { getProdsFromCache } from './getProdsFromCache';
 import { handleCreateCategory } from './handleCreateCategory';
 import { updateCategories } from './updateCategories';
@@ -18,9 +19,11 @@ export async function handleCreateAction(modifiedCategories, modifiedProducts) {
     if (!cacheCategories.has(category)) newCategorySet.add(category);
   });
   if (newCategorySet.size > 0) {
+    // se crea una nueva categoría
     Logger.log(`Creating new category/ies - ${[...newCategorySet]}`);
     const newCategoriesProds = modifiedProducts.filter((modProd) => newCategorySet.has(modProd.category));
-    operationResult.push(handleCreateCategory([...newCategoriesProds]));
+    const createdCategories = handleCreateCategory([...newCategoriesProds]);
+    operationResult.push(createdCategories);
   }
 
   const existingCatModifiedProds = modifiedProducts.filter((modProd) => cacheCategories.has(modProd.category));
@@ -28,9 +31,12 @@ export async function handleCreateAction(modifiedCategories, modifiedProducts) {
   if (existingCatModifiedProds.length > 0) {
     // se crea un producto dentro de una categoría existente. Activa UPDATE action:
     Logger.log(`New product/s added to existing categories - updating category...`);
-    const result = await updateCategories([...modifiedCategories]);
-    operationResult.push(result);
+    const updatedCategories = await updateCategories([...modifiedCategories]);
+    operationResult.push(updatedCategories);
   }
 
-  return operationResult.flat();
+  Logger.log('Caching categories with CREATE action...');
+  await cacheOpResults(operationResult.flat());
+
+  // return operationResult.flat();
 }

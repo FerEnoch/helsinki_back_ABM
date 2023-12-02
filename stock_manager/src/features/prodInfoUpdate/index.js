@@ -14,6 +14,7 @@ export async function productsUpdate() {
         if (isNeededToUpdateProductsInfo) {
           UI.alert(OPERATION_SUCCESS(totalProducts));
         } else {
+          Logger.log(`Se analizaron ${totalProducts} productos y no fue necesario actualizar ninguno`);
           UI.alert(OPERATION_NOT_NECESSARY);
         }
       }

@@ -16,16 +16,16 @@ export function handleCreateCategory(modifiedProducts) {
   }
 
   [...newProductsByCategoryMap.entries()].forEach(([category, prods]) => {
-    Logger.log(`Creating firestore category: ${category}`);
+    Logger.log(`${category} created`);
     const firestoreProductsDocument = {
       folder: productsFolder,
       docLabel: category,
-      data: [...prods],
+      data: [...prods], // Important that 'data' stays last
     };
 
     const returnedInfo = DATABASE_API_ACTIONS[CREATE](firestoreProductsDocument);
     firestoreCategoryCreated.push({
-      category,
+      category, // Important that 'category' stays first
       ...returnedInfo,
     });
   });
