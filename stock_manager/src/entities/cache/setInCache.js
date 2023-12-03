@@ -1,9 +1,11 @@
-export function setInCache({ spreadsheetID, sheetName, value, row }) {
+export function setInCache({ spreadsheetID, sheetName, range, value }) {
+  const { row, col } = range;
   Logger.log(
     `Modifing cache sheet: ${row ? `row: ${row}` : 'appending row'} <-> ${
       value ? `category: ${value[0]}` : 'delete row'
     }`
   );
+
   if (!row && !value) {
     Logger.error(`Provide a row or value to caching process`);
     return;
@@ -19,7 +21,6 @@ export function setInCache({ spreadsheetID, sheetName, value, row }) {
     sheet.appendRow(value);
     return;
   }
-  // Sólo sobreescribe la columna data, que es la última
-  const valueRow = sheet.getRange(row, value.length);
+  const valueRow = sheet.getRange(row, col);
   valueRow.setValue(value[value.length - 1]);
 }

@@ -1,6 +1,7 @@
 import { DATABASE_API_ACTIONS } from '../../../shared/api';
 import { DATABASE_OPERATIONS } from '../../../shared/api/config/database-operations';
 import { DATABASE_FOLDERS } from '../../../shared/api/config/firebase-api';
+import { checkExecutionTime } from '../config.js/checkExecutionTime';
 import { getProdsByCategories } from './getProdsByCategories';
 
 export function handleCreateCategory(modifiedProducts) {
@@ -16,6 +17,8 @@ export function handleCreateCategory(modifiedProducts) {
   }
 
   [...newProductsByCategoryMap.entries()].forEach(([category, prods]) => {
+    if (checkExecutionTime()) throw new Error('retry', { cause: 408 });
+
     Logger.log(`${category} created`);
     const firestoreProductsDocument = {
       folder: productsFolder,

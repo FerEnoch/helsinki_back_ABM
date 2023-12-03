@@ -37,6 +37,4 @@ export async function handleCreateAction(modifiedCategories, modifiedProducts) {
 
   Logger.log('Caching categories with CREATE action...');
   await cacheOpResults(operationResult.flat());
-
-  // return operationResult.flat();
 }

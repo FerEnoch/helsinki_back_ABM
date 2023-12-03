@@ -24,6 +24,8 @@ export const UI_MESSAGES = {
           OPERATION_SUCCESS: UPDATE_OPERATION_SUCCESS,
           OPERATION_FAILURE: UPDATE_OPERATION_FAILURE,
           OPERATION_NOT_NECESSARY: UPDATE_OPERATION_NOT_NECESSARY,
+          RESTART_OPERATION: `La actualización tomó demasiado tiempo y quedan productos por actualizar.
+             Por favor reiníciala para terminar el trabajo`,
         },
       },
       ITEM_2: {

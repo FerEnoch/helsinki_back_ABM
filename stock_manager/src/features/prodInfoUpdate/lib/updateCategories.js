@@ -4,6 +4,7 @@ import { stockDataBuilding } from '../../../entities/sheetData/lib/stockDataBuil
 import { DATABASE_API_ACTIONS } from '../../../shared/api';
 import { DATABASE_OPERATIONS } from '../../../shared/api/config/database-operations';
 import { DATABASE_FOLDERS } from '../../../shared/api/config/firebase-api';
+import { checkExecutionTime } from '../config.js/checkExecutionTime';
 import { getProdsByCategories } from './getProdsByCategories';
 
 export async function updateCategories(modifiedCategories) {
@@ -20,6 +21,8 @@ export async function updateCategories(modifiedCategories) {
   const updatedCategories = [];
 
   modifiedCategories.forEach((categoryToUpdate) => {
+    if (checkExecutionTime()) throw new Error('retry', { cause: 408 });
+
     if (!currentCategoryMap.has(categoryToUpdate)) return;
     const categoryDataToUpdate = compiledStockData.filter(({ category }) => category === categoryToUpdate);
     const cacheCategoryData = cacheSheetData.find(({ category }) => category === categoryToUpdate);

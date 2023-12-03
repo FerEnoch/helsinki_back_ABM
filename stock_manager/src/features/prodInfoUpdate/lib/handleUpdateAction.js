@@ -10,6 +10,4 @@ export async function handleUpdateAction(modifiedCategories) {
 
   Logger.log('Caching categories with UPDATE action...');
   await cacheOpResults(categoriesToCache.flat());
-
-  // return categoriesToCache.flat();
 }

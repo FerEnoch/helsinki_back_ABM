@@ -5,6 +5,7 @@ import { DATABASE_API_ACTIONS } from '../../../shared/api';
 import { DATABASE_OPERATIONS } from '../../../shared/api/config/database-operations';
 import { DATABASE_FOLDERS } from '../../../shared/api/config/firebase-api';
 import { analizeProductsToUpdateDatabase } from '../../databaseUpdate/lib/analizeProductsToUpdateDatabase';
+import { checkExecutionTime } from '../config.js/checkExecutionTime';
 import { getProdsByCategories } from '../lib/getProdsByCategories';
 import { getProdsFromCache } from '../lib/getProdsFromCache';
 import { PROD_CATEGORY_CRUD_CONTROLLER } from './crudController';
@@ -37,9 +38,12 @@ export async function prodInfoUpdate() {
       Logger.log(`CACHE IS EMPTY --> creating firestore docs: products by categories`);
       /**
        * Es la acción inicial: no hay cache, es decir, es la primera carga.
-       * borrar todo firebase por precaución, para actualizar todo junto
+       *
+       * TO-DO: borrar todo firestore por precaución, para actualizar todo junto
        */
       [...currentCategoryMap.entries()].forEach(([category, prods]) => {
+        if (checkExecutionTime()) throw new Error('retry', { cause: 408 });
+
         Logger.log(`Creating firestore category: ${category}`);
         const firestoreProductsDocument = {
           folder: productsFolder,
@@ -79,6 +83,8 @@ export async function prodInfoUpdate() {
       Logger.log('Executing actions...');
       getOperationdResult = Promise.all(
         actionsByCategory.map(async (analizingProcessResult) => {
+          if (checkExecutionTime()) throw new Error('retry', { cause: 408 });
+
           if (!analizingProcessResult) return;
           const [action, modifiedCategories, modifiedProducts] = analizingProcessResult;
 
@@ -90,19 +96,31 @@ export async function prodInfoUpdate() {
             await PROD_CATEGORY_CRUD_CONTROLLER[action]([...modifiedCategories], [...modifiedProducts]);
           } catch (e) {
             // hasWebAppBeenUpdatedSuccessfully = false;
+            if (e.cause === 408) {
+              throw e;
+            } else {
               console.error( /* eslint-disable-line */
-              `***/**** Something happened with ${action} action with this categories: ${modifiedCategories}`,
-              e.message
-            );
+                `***/**** Something happened with ${action} action with this categories: ${modifiedCategories}`,
+                e.message
+              );
+            }
           }
         })
       );
-      // console.log('Final result to cache ->', firestoreProductsInfoToCache);
     }
     await getOperationdResult;
     Logger.log('DONE!');
-    return { message, isNeededToUpdateProductsInfo, totalProducts: compiledStockData.length };
+    return {
+      message,
+      isNeededToUpdateProductsInfo,
+      totalProducts: compiledStockData.length,
+    };
   } catch (e) {
+    if (e.cause === 408) {
+      return {
+        message: e.message,
+      };
+    }
     if (e.cause === 429) {
       return e.message;
     }

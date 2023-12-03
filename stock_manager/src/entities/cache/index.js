@@ -1,3 +1,4 @@
+import { checkExecutionTime } from '../../features/prodInfoUpdate/config.js/checkExecutionTime';
 import { fetchSheetData } from '../sheetData/lib/fetchSheetData';
 import { toCacheSheetDataBuilding } from '../sheetData/lib/toCacheSheetDataBuilding';
 
@@ -46,7 +47,9 @@ export async function overwriteCacheSheetData(sheetID, sheetName, rawData) {
   if (toCacheSheetData.length > 0) {
     cacheSheet.clearContents();
     toCacheSheetData.forEach((row) => {
+      if (checkExecutionTime()) throw new Error('retry', { cause: 408 });
       if (row.length > 0) cacheSheet.appendRow(row);
+      SpreadsheetApp.flush();
     });
   }
 }

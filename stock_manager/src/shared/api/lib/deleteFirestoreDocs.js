@@ -1,3 +1,4 @@
+import { checkExecutionTime } from '../../../features/prodInfoUpdate/config.js/checkExecutionTime';
 import { DATABASE_FOLDERS, ERROR_MESSAGES } from '../config/firebase-api';
 import { firestoreDeleteDoc } from '../model/firestoreDeleteDoc';
 
@@ -6,6 +7,8 @@ export function deleteFirestoreDocs(documents = []) {
 
   try {
     documents.forEach((doc) => {
+      if (checkExecutionTime()) throw new Error('retry', { cause: 408 });
+
       const docFirestoreID = doc.firestoreID;
       if (!docFirestoreID) return;
 
@@ -13,7 +16,7 @@ export function deleteFirestoreDocs(documents = []) {
       const statusCode = firebaseResponse.getResponseCode();
 
       if (statusCode === 200) {
-        Logger.log('Document deleted successfully.');
+        Logger.log(`Document deleted successfully: ${doc.category} - ID: ${docFirestoreID}`);
       } else if (statusCode === 429) {
         throw new Error(ERROR_MESSAGES.CUOTA_EXCEEDED, { cause: 429 });
       } else {
@@ -24,6 +27,7 @@ export function deleteFirestoreDocs(documents = []) {
     // is gives an error (although catched)
     return console.log(`${documents.length} DOCS DELETED FROM FIRESTORE`); /* eslint-disable-line */
   } catch (e) {
-    return console.error(`Something happened... firestore NOT CLEARED completely.`, e.message); /* eslint-disable-line */
+    if (e.cause === 408) throw e;
+    return console.error(`Something happened... firestore doc NOT DELETED properly.`, e.message); /* eslint-disable-line */
   }
 }
