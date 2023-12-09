@@ -7,12 +7,16 @@ export const withAuthAPIOptionsObj = {
   },
 };
 
-// const PRODUCTION_URL = 'https://sjq5dd8h-3000.brs.devtunnels.ms';
+// const LOCAL_PRODUCTION_URL = 'https://sjq5dd8h-3000.brs.devtunnels.ms';
 // const PRODUCTION_URL = 'https://helsinkidelivery.vercel.app';
-const PRODUCTION_URL = 'https://helsinki-delivery-web-app-git-prod-testing-ferenoch.vercel.app';
+const PROD_TESTING_URL = 'https://helsinki-delivery-web-app-git-prod-testing-ferenoch.vercel.app';
 
-export const WEB_APP_PRODUCTS_UPDATES_URL = `${PRODUCTION_URL}/api/products/updates`;
+export const WEB_APP_PRODUCTS_UPDATES_URL = `${PROD_TESTING_URL}/api/products/updates`;
 
-export function getWebAppApiRoute(label) {
-  return `${PRODUCTION_URL}/api/${label}`;
+export function getWebAppApiProdCatRoute(label) {
+  return `${PROD_TESTING_URL}/api/products/${label}`;
+}
+
+export function getWebAppApiInfoRoute(label) {
+  return `${PROD_TESTING_URL}/api/${label}`;
 }

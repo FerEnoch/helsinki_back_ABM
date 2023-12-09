@@ -5,26 +5,26 @@ import { stockDataBuilding } from '../../../entities/sheetData/lib/stockDataBuil
 export async function getDeletePosibilities(modifiedCategories) {
   const catEnterelyDeleted = [];
   const catWithLessProds = [];
-  const { STOCK_SPREADSHEET_ID, STOCK_TESTING /* , STOCK , */, CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE } =
-    SPREADSHEET;
+  const { STOCK_SPREADSHEET_ID, STOCK, CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE } = SPREADSHEET;
 
-  const compiledStockData = await stockDataBuilding(STOCK_SPREADSHEET_ID, STOCK_TESTING);
+  const compiledStockData = await stockDataBuilding(STOCK_SPREADSHEET_ID, STOCK);
   const cacheSheetData = await getCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE);
 
   modifiedCategories.forEach((modCategory) => {
     const categoryDataToUpdate = compiledStockData.filter(({ category }) => category === modCategory);
     const cacheCategoryData = cacheSheetData.find(({ category }) => category === modCategory);
     if (!cacheCategoryData) return;
+    const cacheCategoryProducts = JSON.parse(cacheCategoryData.data);
 
     if (categoryDataToUpdate.length === 0) {
       catEnterelyDeleted.push({
         category: cacheCategoryData.category,
         firestoreID: cacheCategoryData['firestoreName-ID'],
+        data: [...cacheCategoryProducts],
       });
       return;
     }
 
-    const cacheCategoryProducts = JSON.parse(cacheCategoryData.data);
     if (categoryDataToUpdate.length !== cacheCategoryProducts.length) {
       catWithLessProds.push(modCategory);
     }

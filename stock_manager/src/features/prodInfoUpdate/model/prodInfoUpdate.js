@@ -12,8 +12,7 @@ import { PROD_CATEGORY_CRUD_CONTROLLER } from './crudController';
 
 export async function prodInfoUpdate() {
   try {
-    const { STOCK_SPREADSHEET_ID, STOCK_TESTING /* , STOCK */, CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE } =
-      SPREADSHEET;
+    const { STOCK_SPREADSHEET_ID, STOCK, CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE } = SPREADSHEET;
     const { PRODUCTS_BY_CATEGORIES: productsFolder } = DATABASE_FOLDERS;
     const { CREATE, LEAVE } = DATABASE_OPERATIONS;
 
@@ -21,7 +20,7 @@ export async function prodInfoUpdate() {
     let isNeededToUpdateProductsInfo;
     let getOperationdResult;
 
-    const compiledStockData = await stockDataBuilding(STOCK_SPREADSHEET_ID, STOCK_TESTING);
+    const compiledStockData = await stockDataBuilding(STOCK_SPREADSHEET_ID, STOCK);
     const currentCategoryMap = getProdsByCategories(compiledStockData);
     Logger.log(`Total found categories --> ${currentCategoryMap.size}`); // -> 13
 

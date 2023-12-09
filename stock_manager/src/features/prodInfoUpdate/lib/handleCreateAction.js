@@ -4,6 +4,7 @@ import { cacheOpResults } from './cacheOpResults';
 import { getProdsFromCache } from './getProdsFromCache';
 import { handleCreateCategory } from './handleCreateCategory';
 import { updateCategories } from './updateCategories';
+import { updateWebAppProdCatCache } from './updateWebAppProdCatCache';
 
 export async function handleCreateAction(modifiedCategories, modifiedProducts) {
   const { CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE } = SPREADSHEET;
@@ -37,4 +38,8 @@ export async function handleCreateAction(modifiedCategories, modifiedProducts) {
 
   Logger.log('Caching categories with CREATE action...');
   await cacheOpResults(operationResult.flat());
+
+  Logger.log('Updating web app - PATCH after CREATE operation...');
+  const content = operationResult.flat().map((categoryToCache) => categoryToCache['firestoreName-ID']);
+  updateWebAppProdCatCache({ action: 'PATCH', label: 'compose', content });
 }

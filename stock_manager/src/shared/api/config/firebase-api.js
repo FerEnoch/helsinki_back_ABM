@@ -13,6 +13,7 @@ export const DATABASE_FOLDERS = {
   PRODUCTS_BY_CATEGORIES: 'products-categories',
   INFO: 'info',
   PAYMENT_METHODS: 'paymentMethods',
+  FAQ: 'faq',
   IMAGES: 'images',
 };
 

@@ -1,5 +1,6 @@
 import { cacheOpResults } from './cacheOpResults';
 import { updateCategories } from './updateCategories';
+import { updateWebAppProdCatCache } from './updateWebAppProdCatCache';
 
 export async function handleUpdateAction(modifiedCategories) {
   // se actualiza un producto dentro de una categoría
@@ -10,4 +11,8 @@ export async function handleUpdateAction(modifiedCategories) {
 
   Logger.log('Caching categories with UPDATE action...');
   await cacheOpResults(categoriesToCache.flat());
+
+  Logger.log('Updating web app - PATCH after UPDATE products operation...');
+  const content = categoriesToCache.flat().map((categoryToCache) => categoryToCache['firestoreName-ID']);
+  updateWebAppProdCatCache({ action: 'PATCH', label: 'compose', content });
 }

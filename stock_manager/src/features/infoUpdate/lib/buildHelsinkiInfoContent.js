@@ -7,7 +7,7 @@ import { validateKey } from '../../databaseUpdate/lib/validateKey';
  * @param {[]} account
  * @returns {object[]}
  */
-export function buildHelsinkiInfoContent(info, account) {
+export function buildHelsinkiInfoContent(info, account, faq) {
   const { MAIN_SHEET_INFO, MAIN_SHEET_ACCOUNT } = COLUMN_HEADERS;
   const infoToFirestore = [];
 
@@ -20,6 +20,17 @@ export function buildHelsinkiInfoContent(info, account) {
         infoObject[validatedKey] = dataField;
       });
       infoToFirestore.push(infoObject);
+    }
+  });
+
+  faq.forEach((row, index, faqArray) => {
+    if (index === 0) {
+      const faqObject = {};
+      row.forEach((question, questionIndex) => {
+        const answer = faqArray[index + 1][questionIndex];
+        faqObject[question] = answer;
+      });
+      infoToFirestore.push(faqObject);
     }
   });
 

@@ -16,7 +16,7 @@ export const UI_MESSAGES = {
       LABEL: '📱 Actualizar App',
       ITEM_1: {
         LABEL: '📲 Stock',
-        FUNCTION: 'stockUpdate',
+        FUNCTION: 'productsUpdate', // deprecate stockUpdate
         PROMPT: {
           INFO: 'Estás a punto de modificar info de producto',
           CONFIRM:

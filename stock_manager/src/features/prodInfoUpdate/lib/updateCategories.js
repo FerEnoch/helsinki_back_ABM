@@ -10,10 +10,9 @@ import { getProdsByCategories } from './getProdsByCategories';
 export async function updateCategories(modifiedCategories) {
   const { UPDATE } = DATABASE_OPERATIONS;
   const { PRODUCTS_BY_CATEGORIES: productsFolder } = DATABASE_FOLDERS;
-  const { STOCK_SPREADSHEET_ID, STOCK_TESTING /* , STOCK , */, CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE } =
-    SPREADSHEET;
+  const { STOCK_SPREADSHEET_ID, STOCK, CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE } = SPREADSHEET;
 
-  const compiledStockData = await stockDataBuilding(STOCK_SPREADSHEET_ID, STOCK_TESTING);
+  const compiledStockData = await stockDataBuilding(STOCK_SPREADSHEET_ID, STOCK);
   const currentCategoryMap = getProdsByCategories(compiledStockData);
 
   const cacheSheetData = await getCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE);
