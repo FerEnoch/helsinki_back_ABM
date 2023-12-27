@@ -9,8 +9,6 @@
   <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons.css">
   <script>
     /* eslint-disable */
-    // IMPORTANT: Replace the value for DEVELOPER_KEY with the API key obtained
-    // from the Google Developers Console.
     let DEVELOPER_KEY;
     google.script.run.withSuccessHandler(setDeveloperKey).withFailureHandler(showError).getDeveloperKey();
 
@@ -52,11 +50,13 @@
      *     file type specified in the addView call.
      */
     function createPicker(token) {
+      const productsImagesFolderID = '1cVWqoaK2vuYKhM4SZZHfiIWQq9JhTpBD'; // Imágenes de productos
       if (pickerApiLoaded && token) {
         const picker = new google.picker.PickerBuilder()
-          // Instruct Picker to display only spreadsheets in Drive. For other
-          // views, see https://developers.google.com/picker/docs/#otherviews
-          .addView(google.picker.ViewId.DOCS_IMAGES)
+          .addView(new google.picker.DocsView(google.picker.ViewId.DOCS_IMAGES)
+            .setParent(productsImagesFolderID)
+            .setSelectFolderEnabled(true)
+          )
           // Hide the navigation panel so that Picker fills more of the dialog.
           .enableFeature(google.picker.Feature.NAV_HIDDEN)
           // Hide the title bar since an Apps Script dialog already has a title.
@@ -68,6 +68,7 @@
           // Instruct Picker to fill the dialog, minus 2 pixels for the border.
           .setSize(DIALOG_DIMENSIONS.width - 2, DIALOG_DIMENSIONS.height - 2)
           .build();
+
         picker.setVisible(true);
       } else {
         showError('Unable to load the file picker.');

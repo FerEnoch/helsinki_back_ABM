@@ -8,8 +8,8 @@ export const withAuthAPIOptionsObj = {
 };
 
 // const LOCAL_PRODUCTION_URL = 'https://sjq5dd8h-3000.brs.devtunnels.ms';
-const PRODUCTION_URL = 'https://helsinkidelivery.vercel.app';
 // const PROD_TESTING_URL = 'https://helsinki-delivery-web-app-git-prod-testing-ferenoch.vercel.app';
+const PRODUCTION_URL = 'https://www.helsinkidelivery.com.ar';
 
 export const WEB_APP_PRODUCTS_UPDATES_URL = `${PRODUCTION_URL}/api/products/updates`;
 

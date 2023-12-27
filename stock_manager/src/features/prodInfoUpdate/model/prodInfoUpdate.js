@@ -22,7 +22,7 @@ export async function prodInfoUpdate() {
 
     const compiledStockData = await stockDataBuilding(STOCK_SPREADSHEET_ID, STOCK);
     const currentCategoryMap = getProdsByCategories(compiledStockData);
-    Logger.log(`Total found categories --> ${currentCategoryMap.size}`); // -> 13
+    Logger.log(`Total found categories --> ${currentCategoryMap.size}`);
 
     if (!currentCategoryMap) {
       message = 'Unable to build products by categories to update firestore database';
@@ -37,8 +37,6 @@ export async function prodInfoUpdate() {
       Logger.log(`CACHE IS EMPTY --> creating firestore docs: products by categories`);
       /**
        * Es la acción inicial: no hay cache, es decir, es la primera carga.
-       *
-       * TO-DO: borrar todo firestore por precaución, para actualizar todo junto
        */
       [...currentCategoryMap.entries()].forEach(([category, prods]) => {
         if (checkExecutionTime()) throw new Error('retry', { cause: 408 });
@@ -88,13 +86,8 @@ export async function prodInfoUpdate() {
           const [action, modifiedCategories, modifiedProducts] = analizingProcessResult;
 
           try {
-            // case CREATE:
-            // case UPDATE:
-            // case DELETE:
-            // const operationResult =
             await PROD_CATEGORY_CRUD_CONTROLLER[action]([...modifiedCategories], [...modifiedProducts]);
           } catch (e) {
-            // hasWebAppBeenUpdatedSuccessfully = false;
             if (e.cause === 408) {
               throw e;
             } else {
