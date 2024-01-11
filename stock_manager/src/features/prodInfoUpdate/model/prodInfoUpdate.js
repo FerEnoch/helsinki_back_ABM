@@ -59,6 +59,7 @@ export async function prodInfoUpdate() {
       Logger.log(`FOUND CACHE INFO --> Updating Firebase and cache sheet.`);
 
       const cacheProducts = getProdsFromCache(cacheSheetData);
+
       const actionsByProduct = analizeProductsToUpdateDatabase(compiledStockData, cacheProducts);
 
       Logger.log(`ANALIZED PRODUCTS: ${compiledStockData.length}`);
