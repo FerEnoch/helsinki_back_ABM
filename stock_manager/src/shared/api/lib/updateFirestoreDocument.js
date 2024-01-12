@@ -43,7 +43,7 @@ export function updateFirestoreDocument({ folder, firestoneNameID, docLabel, dat
       Logger.log(`Failed to update document ${docLabel}. Status code: ${statusCode}`);
     }
   } catch (e) {
-    console.error(`Something happened... some products were NOT UPDATED successfully.`, e.message); /* eslint-disable-line */
+    console.error(`Something happened... info were NOT UPDATED successfully.`, e.message); /* eslint-disable-line */
     return updatedValueToCache;
   }
   return updatedValueToCache;

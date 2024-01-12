@@ -10,9 +10,9 @@ export async function productsUpdate() {
 
   if (result === UI.Button.YES) {
     try {
-      const { message, totalProducts, isNeededToUpdateProductsInfo } = await prodInfoUpdate();
+      const { message, totalProducts, isNeededToRevalidateCache } = await prodInfoUpdate();
       if (message === 'success') {
-        if (isNeededToUpdateProductsInfo) {
+        if (isNeededToRevalidateCache) {
           UI.alert(OPERATION_SUCCESS(totalProducts));
         } else {
           Logger.log(`Se analizaron ${totalProducts} productos y no fue necesario actualizar ninguno`);

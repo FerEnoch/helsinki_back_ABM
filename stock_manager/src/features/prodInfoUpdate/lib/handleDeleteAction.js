@@ -26,7 +26,7 @@ export async function handleDeleteAction(modifiedCategories) {
   if (catEnterelyDeleted.length > 0) {
     // se borra una categoría entera
     // delete from firebase => firestoreID
-    deleteFirestoreDocs([...catEnterelyDeleted]);
+    deleteFirestoreDocs([...catEnterelyDeleted]); // cambió el contrato
     Logger.log('Caching categories with DELETE action: delete category...');
     await cacheOpResults([...catEnterelyDeleted], DELETE);
 

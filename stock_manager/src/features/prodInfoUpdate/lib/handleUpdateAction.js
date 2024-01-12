@@ -14,5 +14,5 @@ export async function handleUpdateAction(modifiedCategories) {
 
   Logger.log('Updating web app - PATCH after UPDATE products operation...');
   const content = categoriesToCache.flat().map((categoryToCache) => categoryToCache['firestoreName-ID']);
-  updateWebAppProdCatCache({ action: 'PATCH', label: 'compose', content });
+  updateWebAppProdCatCache({ action: 'PATCH', path: 'compose', content });
 }

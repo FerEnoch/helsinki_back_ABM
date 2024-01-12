@@ -1,22 +1,22 @@
 import { checkExecutionTime } from '../../../features/prodInfoUpdate/config.js/checkExecutionTime';
-import { DATABASE_FOLDERS, ERROR_MESSAGES } from '../config/firebase-api';
+import { ERROR_MESSAGES } from '../config/firebase-api';
 import { firestoreDeleteDoc } from '../model/firestoreDeleteDoc';
 
-export function deleteFirestoreDocs(documents = []) {
+export function deleteFirestoreDocs({ documents = [], collection }) {
   if (!documents.length) return Logger.log('NO DOCS TO DELETE FROM FIRESTORE');
 
   try {
     documents.forEach((doc) => {
       if (checkExecutionTime()) throw new Error('retry', { cause: 408 });
 
-      const docFirestoreID = doc.firestoreID;
+      const docFirestoreID = doc['firestoreName-ID'];
       if (!docFirestoreID) return;
 
-      const firebaseResponse = firestoreDeleteDoc(docFirestoreID, DATABASE_FOLDERS.PRODUCTS_BY_CATEGORIES);
+      const firebaseResponse = firestoreDeleteDoc(docFirestoreID, collection);
       const statusCode = firebaseResponse.getResponseCode();
 
       if (statusCode === 200) {
-        Logger.log(`Document deleted successfully: ${doc.category} - ID: ${docFirestoreID}`);
+        Logger.log(`Document deleted successfully -> ID: ${docFirestoreID}`);
       } else if (statusCode === 429) {
         throw new Error(ERROR_MESSAGES.CUOTA_EXCEEDED, { cause: 429 });
       } else {
