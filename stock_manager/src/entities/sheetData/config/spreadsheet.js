@@ -2,6 +2,7 @@ import { SPREADSHEET_CONFIG } from '.';
 
 export const SPREADSHEET = {
   STOCK: SPREADSHEET_CONFIG.STOCK,
+  COMBOS: SPREADSHEET_CONFIG.COMBOS,
   INFO: SPREADSHEET_CONFIG.INFO,
   FAQ: SPREADSHEET_CONFIG.FAQ,
   ACCOUNT: SPREADSHEET_CONFIG.ACCOUNT,
@@ -23,6 +24,13 @@ export const COLUMN_HEADERS = {
     alcohol: /alcohol/i,
     stock: /stock/i,
     price: /p[uú]blico/i,
+  },
+  COMBOS: {
+    name: /nombre/i,
+    featInfo: /info/i,
+    products: /productos/i,
+    price: /precio/i,
+    image: /imagen/i,
   },
   MAIN_SHEET_INFO: {
     about: /quienes somos/i,

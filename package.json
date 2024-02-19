@@ -4,8 +4,8 @@
   "private": true,
   "description": "A program made to control stock and manage orders reception, working with spreadsheets in Google Drive. Also it controls the backend api data for the web app where customers make product selection and orders.",
   "workspaces": [
-    "orders_sheet",
-    "stock_sheet"
+    "orders_manager",
+    "stock_manager"
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

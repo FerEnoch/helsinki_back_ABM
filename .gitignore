@@ -1,10 +1,12 @@
 node_modules
+*/node_modules
 dist
 
-.vscode
-.clasp.json
+*/.vscode
+*/.clasp.json
 
 /orders_manager/src/features/updateStock/config/sheetsIDs.js
+
 /stock_manager/src/entities/sheetData/config/index.js
 /stock_manager/src/features/selectImage/config/index.js
 /stock_manager/src/shared/api/config/api-key.js

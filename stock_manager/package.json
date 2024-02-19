@@ -1,5 +1,5 @@
 {
-  "name": "apps-script-starter_stock-sheet-manager",
+  "name": "stock_manager",
   "version": "11.0.0",
   "description": "Setup a local development environment for Google Apps Script with Visual Studio Code",
   "author": "Amit Agarwal <amit@labnol.org> (https://www.labnol.org)",
