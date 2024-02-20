@@ -12,9 +12,11 @@ import { deleteFirebaseCollection } from '../lib/deleteFirebaseCollection';
 // import { PROD_CATEGORY_CRUD_CONTROLLER } from './crudController';
 import { createFirestoreDocs } from '../lib/createFirestoreDocs';
 import { updateWebAppProdCatCache } from '../lib/updateWebAppProdCatCache';
+import { combosDataBuilding } from '../../../entities/sheetData/lib/combosDataBuilding';
+import { buildCombosInfo } from '../lib/buildCombosInfo';
 
 export async function prodInfoUpdate() {
-  const { STOCK_SPREADSHEET_ID, STOCK, CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE } = SPREADSHEET;
+  const { CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE, PRODUCTS_COMBOS_CACHE } = SPREADSHEET;
   const { PRODUCTS_BY_CATEGORIES: productsFolder } = DATABASE_FOLDERS;
   const { LEAVE } = DATABASE_OPERATIONS;
 
@@ -24,18 +26,23 @@ export async function prodInfoUpdate() {
   // let getOperationdResult;
 
   try {
-    const compiledStockData = await stockDataBuilding(STOCK_SPREADSHEET_ID, STOCK);
+    const [compiledStockData, compiledCombosData] = await Promise.all([stockDataBuilding(), combosDataBuilding()]);
     const currentCategoryMap = getProdsByCategories(compiledStockData);
+    const currentCombosMap = buildCombosInfo(compiledCombosData);
     Logger.log(`Total found categories --> ${currentCategoryMap.size}`);
+    Logger.log(`Total found combos --> ${currentCombosMap.size}`);
 
     if (!currentCategoryMap) {
       message = 'Unable to build products by categories to update firestore database';
       throw new Error(message);
     }
 
-    const cacheSheetData = await getCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE);
+    const [categoriesCacheSheetData, combosCacheSheetData] = await Promise.all([
+      getCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE),
+      getCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_COMBOS_CACHE),
+    ]);
 
-    if (!cacheSheetData.length) {
+    if (!categoriesCacheSheetData.length) {
       // isNeededToRevalidateCache = true;
       Logger.log(`CACHE IS EMPTY --> creating firestore docs: products by categories`);
       /**
@@ -52,7 +59,7 @@ export async function prodInfoUpdate() {
     } else {
       Logger.log(`FOUND CACHE INFO --> Updating Firebase and cache sheet.`);
 
-      const cacheProducts = getProdsFromCache(cacheSheetData);
+      const cacheProducts = getProdsFromCache(categoriesCacheSheetData);
 
       const actionsByProduct = analizeProductsToUpdateDatabase(compiledStockData, cacheProducts);
 

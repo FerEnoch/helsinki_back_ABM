@@ -1,17 +1,17 @@
 import { fetchSheetData } from './fetchSheetData';
-import { COLUMN_HEADERS, INITIAL_URL_FRAGMENTS } from '../config/spreadsheet';
+import { COLUMN_HEADERS, INITIAL_URL_FRAGMENTS, SPREADSHEET } from '../config/spreadsheet';
 import { validateKey } from '../../../features/databaseUpdate/lib/validateKey';
 
 /**
- *
- * @param  {...any} args Target SpreadsheetID and sheet name
+ 
  * @returns {product[]} Array of products
  */
-export async function stockDataBuilding(...args) {
+export async function stockDataBuilding() {
+  const { STOCK_SPREADSHEET_ID, STOCK } = SPREADSHEET;
   const { PRODUCTS: requiredProductKeys } = COLUMN_HEADERS;
 
-  return fetchSheetData(...args, requiredProductKeys).then(({ rawData, headerIndexes }) => {
-    if (!rawData.length) throw new Error('No se pudo compilar la información para actualizar la app');
+  return fetchSheetData(STOCK_SPREADSHEET_ID, STOCK, requiredProductKeys).then(({ rawData, headerIndexes }) => {
+    if (!rawData.length) throw new Error('No se pudo compilar la información de productos para actualizar la app');
     const toDatabaseData = [];
     let stockIndex;
     let idIndex;

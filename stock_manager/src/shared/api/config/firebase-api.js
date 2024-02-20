@@ -10,6 +10,7 @@ const QUERY = 'o?uploadType=media&name=';
 
 export const DATABASE_FOLDERS = {
   PRODUCTS_BY_CATEGORIES: 'products-categories', // 'test' para debug y pruebas
+  PRODUCTS_COMBOS: 'products-combos',
   INFO: 'info',
   PAYMENT_METHODS: 'paymentMethods',
   FAQ: 'faq',
