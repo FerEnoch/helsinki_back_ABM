@@ -28,3 +28,7 @@
 //     return console.error(`Something happened... firestore NOT CLEARED completely.`, e.message); /* eslint-disable-line */
 //   }
 // }
+//
+//
+//
+//

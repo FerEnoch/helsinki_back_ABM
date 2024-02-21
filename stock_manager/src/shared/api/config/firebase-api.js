@@ -9,8 +9,10 @@ const STORAGE_BUCKET_NAME = BUCKET_NAME;
 const QUERY = 'o?uploadType=media&name=';
 
 export const DATABASE_FOLDERS = {
-  PRODUCTS_BY_CATEGORIES: 'products-categories', // 'test' para debug y pruebas
-  PRODUCTS_COMBOS: 'products-combos',
+  // PRODUCTS_BY_CATEGORIES: 'products-categories', // 'test' para debug y pruebas
+  PRODUCTS_BY_CATEGORIES: 'categories-test',
+  PRODUCTS_COMBOS: 'combos-test',
+  // PRODUCTS_COMBOS: 'products-combos', // 'combos-test'para debug y pruebas
   INFO: 'info',
   PAYMENT_METHODS: 'paymentMethods',
   FAQ: 'faq',

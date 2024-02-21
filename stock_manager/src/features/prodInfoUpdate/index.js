@@ -10,12 +10,14 @@ export async function productsUpdate() {
 
   if (result === UI.Button.YES) {
     try {
-      const { message, totalProducts, isNeededToRevalidateCache } = await prodInfoUpdate();
+      const { message, totalProducts, totalCombos, isNeededToRevalidateCache } = await prodInfoUpdate();
       if (message === 'success') {
         if (isNeededToRevalidateCache) {
-          UI.alert(OPERATION_SUCCESS(totalProducts));
+          UI.alert(OPERATION_SUCCESS({ totalProducts, totalCombos }));
         } else {
-          Logger.log(`Se analizaron ${totalProducts} productos y no fue necesario actualizar ninguno`);
+          Logger.log(
+            `Se analizaron ${totalProducts} productos y ${totalCombos} combos, y no fue necesario actualizar ninguno`
+          );
           UI.alert(OPERATION_NOT_NECESSARY);
         }
       }

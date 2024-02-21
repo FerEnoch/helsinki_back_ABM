@@ -1,12 +1,12 @@
-import { DATABASE_OPERATIONS } from '../../../shared/api/config/database-operations';
-import { handleCreateAction } from '../lib/handleCreateAction';
-import { handleDeleteAction } from '../lib/handleDeleteAction';
-import { handleUpdateAction } from '../lib/handleUpdateAction';
+// import { DATABASE_OPERATIONS } from '../../../shared/api/config/database-operations';
+// import { handleCreateAction } from '../lib/handleCreateAction';
+// import { handleDeleteAction } from '../lib/handleDeleteAction';
+// import { handleUpdateAction } from '../lib/handleUpdateAction';
 
-const { /* LEAVE, */ CREATE, UPDATE, DELETE } = DATABASE_OPERATIONS;
+// const { /* LEAVE, */ CREATE, UPDATE, DELETE } = DATABASE_OPERATIONS;
 
-export const PROD_CATEGORY_CRUD_CONTROLLER = {
-  [CREATE]: handleCreateAction,
-  [UPDATE]: handleUpdateAction,
-  [DELETE]: handleDeleteAction,
-};
+// export const PROD_CATEGORY_CRUD_CONTROLLER = {
+//   [CREATE]: handleCreateAction,
+//   [UPDATE]: handleUpdateAction,
+//   [DELETE]: handleDeleteAction,
+// };

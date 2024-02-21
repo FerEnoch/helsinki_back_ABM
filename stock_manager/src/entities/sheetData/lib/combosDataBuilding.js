@@ -2,6 +2,9 @@ import { validateKey } from '../../../features/databaseUpdate/lib/validateKey';
 import { COLUMN_HEADERS, INITIAL_URL_FRAGMENTS, SPREADSHEET } from '../config/spreadsheet';
 import { fetchSheetData } from './fetchSheetData';
 
+/**
+ * @returns {combo[]} Array of combos
+ */
 export async function combosDataBuilding() {
   const { STOCK_SPREADSHEET_ID, COMBOS } = SPREADSHEET;
   const { COMBOS: requiredCombosKeys } = COLUMN_HEADERS;
@@ -10,33 +13,46 @@ export async function combosDataBuilding() {
     if (!rawData.length) throw new Error('No se pudo compilar la información de combos para actualizar la app');
     const toDatabaseData = [];
     let imageIndex;
+    let idIndex;
+    let categoryIndex;
     const comboKeymap = [];
     let combo = {};
     /**
      * Build the rows of needed data out of raw data
      */
+    console.log({ rawData, headerIndexes });
     rawData.forEach((rawRow, rawDataIndex) => {
-      const productReqDataRow = [];
-      headerIndexes.forEach((headerIndex) => productReqDataRow.push(rawRow[headerIndex]));
+      const comboReqDataRow = [];
+      headerIndexes.forEach((headerIndex) => comboReqDataRow.push(rawRow[headerIndex]));
 
       /**
        *  Make some changes in data to build each product
        */
 
-      productReqDataRow.forEach((dataField, appRowIndex) => {
+      comboReqDataRow.forEach((dataField, appRowIndex, arr) => {
         if (rawDataIndex === 0) {
-          // if (!stockIndex && requiredCombosKeys.stock.test(dataField)) {
-          //   stockIndex = appRowIndex;
-          // }
-          // if (!categoryIndex && requiredCombosKeys.category.test(dataField)) {
-          //   categoryIndex = appRowIndex;
-          // }
+          if (!idIndex && requiredCombosKeys.id.test(dataField)) {
+            idIndex = appRowIndex;
+          }
+          if (!categoryIndex && requiredCombosKeys.category.test(dataField)) {
+            categoryIndex = appRowIndex;
+          }
           if (!imageIndex && requiredCombosKeys.image.test(dataField)) {
             imageIndex = appRowIndex;
           }
           combo = null;
           const validatedKey = validateKey(dataField, requiredCombosKeys);
           comboKeymap.push(validatedKey);
+          return;
+        }
+        /**
+         * If there is not a valid productID, or there's not a valid category,
+         * the product is ignored
+         */
+        const hasValidId = String(arr[idIndex]).includes('*');
+        const hasValidCategory = String(arr[categoryIndex]).length > 0;
+        if (!hasValidId || !hasValidCategory) {
+          combo = null;
           return;
         }
         /**
@@ -66,11 +82,11 @@ export async function combosDataBuilding() {
       combo = {};
     });
 
-    const finalCombosCompilation = [];
-    toDatabaseData.forEach((buildedCombo) => {
-      if (!buildedCombo) return;
-      finalCombosCompilation.push({ ...buildedCombo });
-    });
-    return finalCombosCompilation;
+    // const finalCombosCompilation = [];
+    // toDatabaseData.forEach((buildedCombo) => {
+    //   if (!buildedCombo) return;
+    //   finalCombosCompilation.push({ ...buildedCombo });
+    // });
+    return toDatabaseData.filter(Boolean);
   });
 }

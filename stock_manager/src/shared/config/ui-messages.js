@@ -1,7 +1,8 @@
-const UPDATE_OPERATION_SUCCESS = (prodQuantity) =>
-  `👍 Aplicación actualizada exitosamente con ${prodQuantity} productos`;
+const UPDATE_OPERATION_SUCCESS = ({ totalProducts, totalCombos }) =>
+  `👍 La app se actualizó exitosamente con ${totalProducts} productos y ${totalCombos} combos`;
+
 const UPDATE_OPERATION_FAILURE = 'Algo salió mal 😭 No es posible actualizar completa o parcialmente la aplicación 😢';
-const UPDATE_OPERATION_NOT_NECESSARY = 'La aplicación está actualizada 😉';
+const UPDATE_OPERATION_NOT_NECESSARY = 'Todos los productos y combos ya están actualizados en la app 😉';
 
 export const UI_MESSAGES = {
   MENU: {

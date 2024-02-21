@@ -3,7 +3,6 @@ import { COLUMN_HEADERS, INITIAL_URL_FRAGMENTS, SPREADSHEET } from '../config/sp
 import { validateKey } from '../../../features/databaseUpdate/lib/validateKey';
 
 /**
- 
  * @returns {product[]} Array of products
  */
 export async function stockDataBuilding() {
@@ -25,14 +24,12 @@ export async function stockDataBuilding() {
     rawData.forEach((rawRow, rawDataIndex) => {
       const productReqDataRow = [];
       headerIndexes.forEach((headerIndex) => productReqDataRow.push(rawRow[headerIndex]));
-
       /**
        *  Make some changes in data to build each product
        */
-
       productReqDataRow.forEach((dataField, appRowIndex, arr) => {
         if (rawDataIndex === 0) {
-          if (!stockIndex && requiredProductKeys.stock.test(dataField)) {
+          if (!stockIndex && requiredProductKeys?.stock.test(dataField)) {
             stockIndex = appRowIndex;
           }
           if (!idIndex && requiredProductKeys.id.test(dataField)) {
@@ -53,8 +50,9 @@ export async function stockDataBuilding() {
          * If there is not a valid productID, or there's not a valid category,
          * the product is ignored
          */
-        const hasValidId = arr[idIndex].includes('#');
-        const hasValidCategory = arr[categoryIndex].length > 0;
+        const stringId = String(arr[idIndex]);
+        const hasValidId = stringId.includes('#') || stringId.includes('*');
+        const hasValidCategory = String(arr[categoryIndex]).length > 0;
         if (!hasValidId || !hasValidCategory) {
           product = null;
           return;

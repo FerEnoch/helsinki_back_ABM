@@ -1,36 +1,34 @@
 import { getCacheSheetData, overwriteCacheSheetData } from '../../../entities/cache';
 import { SPREADSHEET } from '../../../entities/sheetData/config/spreadsheet';
 import { stockDataBuilding } from '../../../entities/sheetData/lib/stockDataBuilding';
-// import { DATABASE_API_ACTIONS } from '../../../shared/api';
-import { DATABASE_OPERATIONS } from '../../../shared/api/config/database-operations';
 import { DATABASE_FOLDERS } from '../../../shared/api/config/firebase-api';
-import { analizeProductsToUpdateDatabase } from '../../databaseUpdate/lib/analizeProductsToUpdateDatabase';
-// import { checkExecutionTime } from '../config.js/checkExecutionTime';
 import { getProdsByCategories } from '../lib/getProdsByCategories';
 import { getProdsFromCache } from '../lib/getProdsFromCache';
 import { deleteFirebaseCollection } from '../lib/deleteFirebaseCollection';
-// import { PROD_CATEGORY_CRUD_CONTROLLER } from './crudController';
 import { createFirestoreDocs } from '../lib/createFirestoreDocs';
 import { updateWebAppProdCatCache } from '../lib/updateWebAppProdCatCache';
 import { combosDataBuilding } from '../../../entities/sheetData/lib/combosDataBuilding';
 import { buildCombosInfo } from '../lib/buildCombosInfo';
+import { checkIfNeedToRevalidate } from './checkIfNeedToRevalidate';
 
 export async function prodInfoUpdate() {
   const { CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE, PRODUCTS_COMBOS_CACHE } = SPREADSHEET;
-  const { PRODUCTS_BY_CATEGORIES: productsFolder } = DATABASE_FOLDERS;
-  const { LEAVE } = DATABASE_OPERATIONS;
+  const { PRODUCTS_BY_CATEGORIES: productsFolder, PRODUCTS_COMBOS: combosFolder } = DATABASE_FOLDERS;
 
   let message = 'success';
-  const isCacheOudated = new Set();
   let categoriesToCache;
-  // let getOperationdResult;
+  let combosToCache;
+  let revalidateProdsCategories;
+  let revalidateProdsCombos;
 
   try {
     const [compiledStockData, compiledCombosData] = await Promise.all([stockDataBuilding(), combosDataBuilding()]);
     const currentCategoryMap = getProdsByCategories(compiledStockData);
     const currentCombosMap = buildCombosInfo(compiledCombosData);
-    Logger.log(`Total found categories --> ${currentCategoryMap.size}`);
-    Logger.log(`Total found combos --> ${currentCombosMap.size}`);
+    Logger.log(`
+    Total found categories --> ${currentCategoryMap.size}
+    Total found combos --> ${compiledCombosData.length}
+    `);
 
     if (!currentCategoryMap) {
       message = 'Unable to build products by categories to update firestore database';
@@ -43,44 +41,39 @@ export async function prodInfoUpdate() {
     ]);
 
     if (!categoriesCacheSheetData.length) {
-      // isNeededToRevalidateCache = true;
-      Logger.log(`CACHE IS EMPTY --> creating firestore docs: products by categories`);
+      Logger.log(`CACHE IS EMPTY --> creating firestore docs: products by categories and combos`);
       /**
        * Es la acción inicial: no hay cache, es decir, es la primera carga.
-       * No es necesario revalidar la web app cache
+       * Si no hay cache de categorías, no debería haber de combos tampoco.
+       * No es necesario revalidar la web app cache (se haría un rebuild)
        */
       categoriesToCache = createFirestoreDocs({
         documents: [...currentCategoryMap.entries()],
         collection: productsFolder,
       });
-
       Logger.log(`Adding products to cache sheet`);
       await overwriteCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE, [...categoriesToCache]);
+      /**
+       * refactor en promesas
+       */
+      // createFirestoreDocs w/combos
+      combosToCache = createFirestoreDocs({
+        documents: [...currentCombosMap.entries()],
+        collection: combosFolder,
+      });
+      Logger.log(`Adding combos to cache sheet`);
+      await overwriteCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_COMBOS_CACHE, [...combosToCache]);
     } else {
-      Logger.log(`FOUND CACHE INFO --> Updating Firebase and cache sheet.`);
+      Logger.log(`FOUND CACHE PRODUCTS --> Evaluate actions to update Firebase and cache sheet.`);
 
       const cacheProducts = getProdsFromCache(categoriesCacheSheetData);
+      revalidateProdsCategories = await checkIfNeedToRevalidate(compiledStockData, cacheProducts);
 
-      const actionsByProduct = analizeProductsToUpdateDatabase(compiledStockData, cacheProducts);
+      /**
+       * refactor en promesas
+       */
 
-      Logger.log(`ANALIZED PRODUCTS: ${compiledStockData.length}`);
-      // const actionsByCategory =
-      actionsByProduct.forEach(({ action, content }) => {
-        const categorySet = new Set();
-        if (content.length > 0) {
-          isCacheOudated.add(action !== LEAVE);
-          // if (!isNeededToRevalidateCache) return null;
-          content.forEach((prod) => {
-            //   if (Object.hasOwn(prod, 'firestoreName-ID')) delete prod['firestoreName-ID']; /* eslint-disable-line */
-            categorySet.add(prod.category);
-          });
-          Logger.log(`ACTION: ${action} ${content.length} PRODUCTS - CATEGORIES: ${[...categorySet]}`);
-          // return [action, [...categorySet], [...content]];
-        }
-        // return null;
-      });
-
-      if (isCacheOudated.has(true)) {
+      if (revalidateProdsCategories) {
         Logger.log('Executing actions...');
         /**
          * Ya que borrar la colección completa vía rest API no se puede,
@@ -100,34 +93,39 @@ export async function prodInfoUpdate() {
         // revalidate web app
         updateWebAppProdCatCache({ action: 'PATCH', path: 'compose', content: { tag: 'REVALIDATE' } });
       }
-      //   getOperationdResult = Promise.all(
-      //     actionsByCategory.map(async (analizingProcessResult) => {
-      //       if (checkExecutionTime()) throw new Error('retry', { cause: 408 });
 
-      //       if (!analizingProcessResult) return;
-      //       const [action, modifiedCategories, modifiedProducts] = analizingProcessResult;
+      if (combosCacheSheetData.length > 0) {
+        const cacheCombos = getProdsFromCache(combosCacheSheetData);
+        revalidateProdsCombos = await checkIfNeedToRevalidate(compiledCombosData, cacheCombos);
 
-      //       try {
-      //         await PROD_CATEGORY_CRUD_CONTROLLER[action]([...modifiedCategories], [...modifiedProducts]);
-      //       } catch (e) {
-      //         if (e.cause === 408) {
-      //           throw e;
-      //         } else {
-      //           console.error( /* eslint-disable-line */
-      //             `***/**** Something happened with ${action} action with this categories: ${modifiedCategories}`,
-      //             e.message
-      //           );
-      //         }
-      //       }
-      //     })
-      //   );
+        if (revalidateProdsCombos) {
+          deleteFirebaseCollection({ collection: combosFolder });
+          Logger.log(`REVALIDATING CACHE --> creating firestore docs: combos`);
+          combosToCache = createFirestoreDocs({
+            documents: [...currentCombosMap.entries()],
+            collection: combosFolder,
+          });
+          Logger.log(`Adding combos to cache sheet`);
+          await overwriteCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_COMBOS_CACHE, [...combosToCache]);
+          // revalidate web app
+          updateWebAppProdCatCache({ action: 'PATCH', path: 'compose', content: { tag: 'REVALIDATE' } });
+        }
+      } else {
+        combosToCache = createFirestoreDocs({
+          documents: [...currentCombosMap.entries()],
+          collection: combosFolder,
+        });
+        Logger.log(`Adding combos to cache sheet`);
+        await overwriteCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_COMBOS_CACHE, [...combosToCache]);
+        updateWebAppProdCatCache({ action: 'PATCH', path: 'compose', content: { tag: 'REVALIDATE' } });
+      }
     }
-    // await getOperationdResult;
     Logger.log('DONE!');
     return {
       message,
-      isNeededToRevalidateCache: isCacheOudated.has(true),
+      isNeededToRevalidateCache: revalidateProdsCategories || revalidateProdsCombos,
       totalProducts: compiledStockData.length,
+      totalCombos: compiledCombosData.length,
     };
   } catch (e) {
     if (e.cause === 408) {
