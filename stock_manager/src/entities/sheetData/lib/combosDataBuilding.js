@@ -20,7 +20,6 @@ export async function combosDataBuilding() {
     /**
      * Build the rows of needed data out of raw data
      */
-    console.log({ rawData, headerIndexes });
     rawData.forEach((rawRow, rawDataIndex) => {
       const comboReqDataRow = [];
       headerIndexes.forEach((headerIndex) => comboReqDataRow.push(rawRow[headerIndex]));

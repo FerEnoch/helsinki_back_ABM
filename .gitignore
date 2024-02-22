@@ -5,6 +5,8 @@ dist
 */.vscode
 */.clasp.json
 
+*/test
+
 /orders_manager/src/features/updateStock/config/sheetsIDs.js
 
 /stock_manager/src/entities/sheetData/config/index.js
