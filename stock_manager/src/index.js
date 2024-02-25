@@ -8,6 +8,10 @@ import { showSelectionWindow } from './features/selectImage/ui/showSelectionWind
 import { infoUpdate } from './features/infoUpdate';
 import { productsUpdate } from './features/prodInfoUpdate';
 
+console.log( /* eslint-disable-line */
+  `Currently on ${process.env.NODE_ENV}-mode` 
+)
+
 global.onOpen = onOpen;
 global.onEdit = onEdit;
 global.getOAuthToken = getOAuthToken;

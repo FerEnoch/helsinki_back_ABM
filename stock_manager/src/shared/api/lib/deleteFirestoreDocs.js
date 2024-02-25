@@ -5,6 +5,10 @@ import { firestoreDeleteDoc } from '../model/firestoreDeleteDoc';
 export function deleteFirestoreDocs({ documents = [], collection }) {
   if (!documents.length) return Logger.log('NO DOCS TO DELETE FROM FIRESTORE');
 
+  /**
+   * refactor en promesas
+   */
+
   try {
     documents.forEach((doc) => {
       if (checkExecutionTime()) throw new Error('retry', { cause: 408 });

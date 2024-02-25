@@ -1,14 +1,14 @@
-export function getProdsByCategories(stockData) {
+export async function getProdsByCategories(buildedData) {
   const categories = new Set();
 
-  stockData.forEach((product) => {
+  buildedData.forEach((product) => {
     categories.add(product.category);
   });
 
   const prodsByCategories = new Map();
 
   [...categories].forEach((category) => {
-    const filteredProd = stockData.filter((prod) => prod.category === category);
+    const filteredProd = buildedData.filter((prod) => prod.category === category);
     prodsByCategories.set(category, filteredProd);
   });
 

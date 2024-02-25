@@ -14,8 +14,8 @@ export async function checkIfNeedToRevalidate(...args) {
         categorySet.add(prod.category);
       });
       Logger.log(`
-        ACTION: ${action} 
         ITEMS: ${content.length}
+        ACTION: ${action} 
         CATEGORIES: ${[...categorySet]}
        `);
     }

@@ -20,7 +20,8 @@ const getSrcPath = (filePath) => {
 };
 
 module.exports = {
-  mode: 'production',
+  mode: process.env.NODE_ENV,
+  devtool: false,
   context: __dirname,
   entry: getSrcPath('/index.js'),
   output: {
@@ -32,14 +33,14 @@ module.exports = {
     extensions: ['.js'],
   },
   optimization: {
-    minimize: false,
+    minimize: process.env.NODE_ENV === 'production',
     minimizer: [
       new TerserPlugin({
         test: /\.js$/i,
         extractComments: false,
         terserOptions: {
           ecma: 2020,
-          compress: true,
+          compress: false,
           mangle: {
             reserved: ['global'],
             keep_fnames: true, // Easier debugging in the browser
@@ -55,7 +56,7 @@ module.exports = {
     hints: false,
   },
   watchOptions: {
-    ignored: ['**/dist', '**/node_modules'],
+    ignored: ['**/dist', '**/node_modules', '**/test'],
   },
   module: {
     rules: [
@@ -87,12 +88,12 @@ module.exports = {
           from: getSrcPath('../appsscript.json'),
           to: '[name][ext]',
         },
-        {
-          from: getSrcPath('../functions/*.js'),
-          to: '[name][ext]',
-          noErrorOnMissing: true,
-          info: { minimized: true },
-        },
+        // {
+        //   from: getSrcPath('../functions/*.js'),
+        //   to: '[name][ext]',
+        //   noErrorOnMissing: true,
+        //   info: { minimized: process.env.NODE_MODE === 'production' },
+        // },
         {
           from: getSrcPath('../../node_modules/apps-script-oauth2/dist/OAuth2.gs'),
           to: 'OAuth2.js',
