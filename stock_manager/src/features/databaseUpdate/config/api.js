@@ -16,9 +16,9 @@ const HOSTING_URL = 'https://www.helsinkidelivery.com.ar';
 export const PRODUCTION_URL = productionMode ? HOSTING_URL : LOCAL_PRODUCTION_URL;
 
 export function getWebAppApiProdCatRoute(path) {
-  return `${PRODUCTION_URL}/api/products/${path || ''}`;
+  return `${PRODUCTION_URL}/api/products/${path}`;
 }
 
 export function getWebAppApiInfoRoute(path) {
-  return `${PRODUCTION_URL}/api/${path || ''}`;
+  return `${PRODUCTION_URL}/api/${path}`;
 }

@@ -80,8 +80,7 @@ export async function prodInfoUpdate() {
         Logger.log('Executing actions...');
         /**
          * Ya que borrar la colección completa vía rest API no se puede,
-         * me queda la duda si se podría sobreescribir (la colección) de alguna manera.
-         * Acá opté por borrar cada documento (vaciar la colección), y crear los nuevos
+         * Opté por borrar cada documento (vaciar la colección), y crear los nuevos
          */
         // delete firebase cache
         deleteFirebaseCollection({ collection: productsFolder });
@@ -129,7 +128,15 @@ export async function prodInfoUpdate() {
     }
     const isNeededToRevalidateCache = revalidateProdsCategories || revalidateProdsCombos;
     if (isNeededToRevalidateCache) {
-      updateWebAppProdCatCache({ action: 'PATCH', path: 'compose', content: { tag: 'REVALIDATE' } });
+      // revalidate web app
+      Logger.log('Updating web app cache');
+      // updateWebAppProdCatCache({ action: 'PATCH', path: 'compose', content: { tag: 'REVALIDATE' } });
+      const { message: responseMessage, code } = updateWebAppProdCatCache({
+        action: 'PATCH',
+        path: 'compose',
+        content: { tag: 'REVALIDATE' },
+      });
+      Logger.log(`${responseMessage} - Response status: ${code}`);
     }
     Logger.log('DONE!');
     return {
