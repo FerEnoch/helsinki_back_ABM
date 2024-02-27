@@ -2,7 +2,7 @@ import { buildedCombosData, testCombosMapBuilding } from '../../../entities/shee
 import { buildedStockData, testStockMapBuilding } from '../../../entities/sheetData/lib/test/stock';
 import { getProdsByCategories } from './getProdsByCategories';
 
-describe('Data building', () => {
+describe('Data maps building', () => {
   test('It should build map with stock data', async () => {
     const result = {};
     (await getProdsByCategories(buildedStockData)).forEach((values, key) => {

@@ -9,9 +9,9 @@ export const withAuthAPIOptionsObj = {
   },
 };
 
-const LOCAL_PRODUCTION_URL = 'https://sjq5dd8h-3000.brs.devtunnels.ms';
+export const LOCAL_PRODUCTION_URL = 'https://sjq5dd8h-3000.brs.devtunnels.ms';
 // const HOSTING_TESTING_URL = 'https://helsinki-delivery-web-app-git-prod-testing-ferenoch.vercel.app';
-const HOSTING_URL = 'https://www.helsinkidelivery.com.ar';
+export const HOSTING_URL = 'https://www.helsinkidelivery.com.ar';
 
 export const PRODUCTION_URL = productionMode ? HOSTING_URL : LOCAL_PRODUCTION_URL;
 

@@ -20,26 +20,26 @@ export async function prodInfoUpdate() {
   let revalidateProdsCombos;
 
   try {
-    const [compiledStockData, compiledCombosData] = await Promise.all([dataBuilding(STOCK), dataBuilding(COMBOS)]);
+    const [buildedStockData, buildedCombosData, categoriesCacheSheetData, combosCacheSheetData] = await Promise.all([
+      dataBuilding(STOCK),
+      dataBuilding(COMBOS),
+      getCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE),
+      getCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_COMBOS_CACHE),
+    ]);
     const [currentCategoryMap, currentCombosMap] = await Promise.all([
-      getProdsByCategories(compiledStockData),
-      getProdsByCategories(compiledCombosData),
+      getProdsByCategories(buildedStockData),
+      getProdsByCategories(buildedCombosData),
     ]);
     // const currentCombosMap = buildCombosInfo(compiledCombosData);
     Logger.log(`
     Total found categories --> ${currentCategoryMap.size}
-    Total found combos --> ${compiledCombosData.length}
+    Total found combos --> ${buildedCombosData.length}
     `);
 
     if (!currentCategoryMap) {
       message = 'Unable to build products by categories to update firestore database';
       throw new Error(message);
     }
-
-    const [categoriesCacheSheetData, combosCacheSheetData] = await Promise.all([
-      getCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE),
-      getCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_COMBOS_CACHE),
-    ]);
 
     if (!categoriesCacheSheetData.length) {
       Logger.log(`CACHE IS EMPTY --> creating firestore docs: products by categories and combos`);
@@ -69,8 +69,8 @@ export async function prodInfoUpdate() {
     } else {
       Logger.log(`FOUND CACHE PRODUCTS --> Evaluate actions to update Firebase and cache sheet.`);
 
-      const cacheProducts = getProdsFromCache(categoriesCacheSheetData);
-      revalidateProdsCategories = await checkIfNeedToRevalidate(compiledStockData, cacheProducts);
+      /** ***** TESTING */
+      revalidateProdsCategories = await checkIfNeedToRevalidate(buildedStockData, categoriesCacheSheetData);
 
       /**
        * refactor en promesas
@@ -99,7 +99,7 @@ export async function prodInfoUpdate() {
 
       if (combosCacheSheetData.length > 0) {
         const cacheCombos = getProdsFromCache(combosCacheSheetData);
-        revalidateProdsCombos = await checkIfNeedToRevalidate(compiledCombosData, cacheCombos);
+        revalidateProdsCombos = await checkIfNeedToRevalidate(buildedCombosData, cacheCombos);
 
         if (revalidateProdsCombos) {
           deleteFirebaseCollection({ collection: combosFolder });
@@ -142,8 +142,8 @@ export async function prodInfoUpdate() {
     return {
       message,
       isNeededToRevalidateCache,
-      totalProducts: compiledStockData.length,
-      totalCombos: compiledCombosData.length,
+      totalProducts: buildedStockData.length,
+      totalCombos: buildedCombosData.length,
     };
   } catch (e) {
     if (e.cause === 408) {

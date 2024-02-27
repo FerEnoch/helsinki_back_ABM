@@ -2,11 +2,13 @@
 import path from 'node:path';
 
 const devMode = process.env.NODE_ENV === 'development';
-const ignoredPathOnDevelopment = devMode ? path.join(process.cwd(), 'test', 'beOnProduction.test.js') : '';
+const prodModeTesting = path.join(process.cwd(), 'test', 'beOnProduction.test.js');
+const devModeTesting = path.join(process.cwd(), 'test', 'beOnDevelopment.test.js');
+const ignoredPath = devMode ? prodModeTesting : devModeTesting;
 
 const config = {
   verbose: true,
-  testPathIgnorePatterns: devMode ? [ignoredPathOnDevelopment, '/node_modules'] : [],
+  testPathIgnorePatterns: [ignoredPath, '/node_modules'],
 };
 
 export default config;
