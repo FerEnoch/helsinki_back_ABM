@@ -3,7 +3,6 @@ import { SPREADSHEET } from '../../../entities/sheetData/config/spreadsheet';
 import { dataBuilding } from '../../../entities/sheetData/lib/dataBuilding';
 import { DATABASE_FOLDERS } from '../../../shared/api/config/firebase-api';
 import { getProdsByCategories } from '../lib/getProdsByCategories';
-import { getProdsFromCache } from '../lib/getProdsFromCache';
 import { deleteFirebaseCollection } from '../lib/deleteFirebaseCollection';
 import { createFirestoreDocs } from '../lib/createFirestoreDocs';
 import { updateWebAppProdCatCache } from '../lib/updateWebAppProdCatCache';
@@ -42,7 +41,7 @@ export async function prodInfoUpdate() {
     }
 
     if (!categoriesCacheSheetData.length) {
-      Logger.log(`CACHE IS EMPTY --> creating firestore docs: products by categories and combos`);
+      Logger.log(`CATEGORIES CACHE IS EMPTY --> creating firestore docs: products by categories AND combos`);
       /**
        * Es la acción inicial: no hay cache, es decir, es la primera carga.
        * Si no hay cache de categorías, no debería haber de combos tampoco.
@@ -69,7 +68,6 @@ export async function prodInfoUpdate() {
     } else {
       Logger.log(`FOUND CACHE PRODUCTS --> Evaluate actions to update Firebase and cache sheet.`);
 
-      /** ***** TESTING */
       revalidateProdsCategories = await checkIfNeedToRevalidate(buildedStockData, categoriesCacheSheetData);
 
       /**
@@ -98,8 +96,9 @@ export async function prodInfoUpdate() {
       }
 
       if (combosCacheSheetData.length > 0) {
-        const cacheCombos = getProdsFromCache(combosCacheSheetData);
-        revalidateProdsCombos = await checkIfNeedToRevalidate(buildedCombosData, cacheCombos);
+        Logger.log(`FOUND CACHE COMBOS --> Evaluate actions to update Firebase and cache sheet.`);
+
+        revalidateProdsCombos = await checkIfNeedToRevalidate(buildedCombosData, combosCacheSheetData);
 
         if (revalidateProdsCombos) {
           deleteFirebaseCollection({ collection: combosFolder });
@@ -115,6 +114,7 @@ export async function prodInfoUpdate() {
           // updateWebAppProdCatCache({ action: 'PATCH', path: 'compose', content: { tag: 'REVALIDATE' } });
         }
       } else {
+        Logger.log(`COMBOS CACHE IS EMPTY --> creating firestore docs: products by categories and combos`);
         combosToCache = createFirestoreDocs({
           documents: [...currentCombosMap.entries()],
           collection: combosFolder,

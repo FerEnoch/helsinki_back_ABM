@@ -12,8 +12,8 @@
     "format": "prettier --write dist/code.js",
     "postbuild": "npm run format",
     "upload": "npx clasp push",
-    "deploy:prod": "test:prod && npm run build:prod && npm run upload",
-    "deploy:dev": "npm run build:dev && npm run upload",
+    "deploy:prod": "NODE_ENV=production jest --silent && npm run build:prod && npm run upload",
+    "deploy:dev": "NODE_ENV=development jest --silent && npm run build:dev && npm run upload",
     "test:dev": "NODE_ENV=development jest",
     "test:prod": "NODE_ENV=production jest"
   },
