@@ -33,7 +33,7 @@ module.exports = {
     extensions: ['.js'],
   },
   optimization: {
-    minimize: process.env.NODE_ENV === 'production',
+    minimize: false,
     minimizer: [
       new TerserPlugin({
         test: /\.js$/i,
