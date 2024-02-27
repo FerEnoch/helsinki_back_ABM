@@ -87,7 +87,7 @@ export async function dataBuilding(sheet) {
             .trim()
             .split('/')
             .map((combo) => {
-              if (combo) return null;
+              if (!combo) return null;
               let processCombo = combo;
               if (processCombo.includes('/')) {
                 processCombo = processCombo.replace('/', '');
