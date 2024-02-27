@@ -2,8 +2,8 @@ import { deleteFirestoreDocs } from '../../../shared/api/lib/deleteFirestoreDocs
 // import { firebaseDatabaseDeleteFiles } from './firebaseDatabaseDeleteFiles';
 import { getFirestoreDocsList } from './getFirestoreCurrentDocs';
 
-export function deleteFirebaseCollection({ collection }) {
+export async function deleteFirebaseCollection({ collection }) {
   const currentFirestoreCategories = getFirestoreDocsList(collection);
   // firebaseDatabaseDeleteFiles(currentFirestoreCategories);
-  deleteFirestoreDocs({ documents: currentFirestoreCategories, collection });
+  await deleteFirestoreDocs({ documents: currentFirestoreCategories, collection });
 }

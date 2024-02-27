@@ -11,21 +11,23 @@ export async function getCacheSheetData(...args) {
   if (!cachedDataArrays?.length) return [];
   const cacheValues = [];
   const headers = [];
-  cachedDataArrays.forEach((valueDataRow, rowIndex) => {
-    if (!valueDataRow || !valueDataRow.length) return;
-    const value = {};
-    /* First row of the cache sheet is the headers row */
-    if (rowIndex === 0) {
-      valueDataRow.forEach((header) => {
-        headers.push(header);
+  await Promise.all(
+    cachedDataArrays.map(async (valueDataRow, rowIndex) => {
+      if (!valueDataRow || !valueDataRow.length) return;
+      const value = {};
+      /* First row of the cache sheet is the headers row */
+      if (rowIndex === 0) {
+        valueDataRow.forEach((header) => {
+          headers.push(header);
+        });
+        return;
+      }
+      valueDataRow.forEach((entry, entryIndex) => {
+        value[headers[entryIndex]] = entry;
       });
-      return;
-    }
-    valueDataRow.forEach((entry, entryIndex) => {
-      value[headers[entryIndex]] = entry;
-    });
-    cacheValues.push(value);
-  });
+      cacheValues.push(value);
+    })
+  );
   return cacheValues;
 }
 
