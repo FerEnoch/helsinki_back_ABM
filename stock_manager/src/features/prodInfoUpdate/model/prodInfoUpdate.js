@@ -13,8 +13,6 @@ export async function prodInfoUpdate() {
   const { PRODUCTS_BY_CATEGORIES: productsFolder, PRODUCTS_COMBOS: combosFolder } = DATABASE_FOLDERS;
 
   let message = 'success';
-  let categoriesToCache;
-  let combosToCache;
   let revalidateProdsCategories;
   let revalidateProdsCombos;
 
