@@ -85,10 +85,17 @@ export async function dataBuilding(sheet) {
           product[productKeymap[appRowIndex]] = dataField
             .replace('\n', '')
             .trim()
-            .split('//')
+            .split('/')
             .map((combo) => {
-              if (!combo) return null;
-              return combo.trim().split('-');
+              if (combo) return null;
+              let processCombo = combo;
+              if (processCombo.includes('/')) {
+                processCombo = processCombo.replace('/', '');
+              }
+              if (processCombo.includes('-')) {
+                return processCombo.trim().split('-');
+              }
+              return [processCombo.trim(), String(1)];
             })
             .filter(Boolean);
           return;
