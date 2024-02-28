@@ -12,5 +12,5 @@ export async function getProdsByCategories(buildedData) {
     prodsByCategories.set(category, filteredProd);
   });
 
-  return prodsByCategories.size > 0 ? prodsByCategories : null;
+  return prodsByCategories.size > 0 ? prodsByCategories : new Map();
 }

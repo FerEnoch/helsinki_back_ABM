@@ -29,17 +29,17 @@ export async function prodInfoUpdate() {
     ]);
     // const currentCombosMap = buildCombosInfo(compiledCombosData);
     Logger.log(`
-    Total found categories --> ${currentCategoryMap.size}
+    Total found categories --> ${buildedStockData.length}
     Total found combos --> ${buildedCombosData.length}
     `);
 
-    if (!currentCategoryMap) {
+    if (currentCategoryMap.size === 0) {
       message = 'Unable to build products by categories to update firestore database';
       throw new Error(message);
     }
 
     if (!categoriesCacheSheetData.length) {
-      Logger.log(`CATEGORIES CACHE IS EMPTY --> creating firestore docs: products by categories AND combos`);
+      Logger.log(`CATEGORIES CACHE IS EMPTY --> creating products by categories AND combos from scratch`);
       /**
        * Es la acción inicial: no hay cache, es decir, es la primera carga.
        * Si no hay cache de categorías, no debería haber de combos tampoco.
@@ -49,7 +49,7 @@ export async function prodInfoUpdate() {
           documents: [...currentCategoryMap.entries()],
           collection: productsFolder,
         }).then(async (toCache) => {
-          Logger.log(`Adding products to cache sheet`);
+          Logger.log(`Adding products by categories to cache sheet`);
           await overwriteCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE, toCache);
         }),
         createFirestoreDocs({
@@ -62,7 +62,7 @@ export async function prodInfoUpdate() {
       ]);
       revalidateProdsCategories = true;
     } else {
-      Logger.log(`FOUND CACHE PRODUCTS --> Evaluate actions to update Firebase and cache sheet.`);
+      Logger.log(`FOUND CACHE PRODUCTS BY CATEGORIES --> Evaluate actions to update.`);
 
       revalidateProdsCategories = await checkIfNeedToRevalidate(buildedStockData, categoriesCacheSheetData);
 
@@ -75,7 +75,7 @@ export async function prodInfoUpdate() {
         // delete firebase cache
         await deleteFirebaseCollection({ collection: productsFolder });
         // create new collection
-        Logger.log(`REVALIDATING CACHE --> creating firestore docs: products by categories`);
+        Logger.log(`Revalidating PRODUCTS BY CATEGORIES cache`);
         createFirestoreDocs({
           documents: [...currentCategoryMap.entries()],
           collection: productsFolder,
@@ -88,14 +88,13 @@ export async function prodInfoUpdate() {
       }
 
       if (combosCacheSheetData.length > 0) {
-        Logger.log(`FOUND CACHE COMBOS --> Evaluate actions to update Firebase and cache sheet.`);
+        Logger.log(`FOUND CACHE COMBOS --> Evaluate actions to update`);
 
         revalidateProdsCombos = await checkIfNeedToRevalidate(buildedCombosData, combosCacheSheetData);
 
         if (revalidateProdsCombos) {
           await deleteFirebaseCollection({ collection: combosFolder });
-          Logger.log(`REVALIDATING CACHE --> creating firestore docs: combos`);
-          /** refactorizar en promesas */
+          Logger.log(`Revalidating COMBOS cache`);
           createFirestoreDocs({
             documents: [...currentCombosMap.entries()],
             collection: combosFolder,
@@ -106,8 +105,8 @@ export async function prodInfoUpdate() {
           // revalidate web app
           // updateWebAppProdCatCache({ action: 'PATCH', path: 'compose', content: { tag: 'REVALIDATE' } });
         }
-      } else {
-        Logger.log(`COMBOS CACHE IS EMPTY --> creating firestore docs: products by categories and combos`);
+      } else if (currentCombosMap?.size > 0) {
+        Logger.log(`COMBOS CACHE IS EMPTY --> creating combos from scratch`);
         createFirestoreDocs({
           documents: [...currentCombosMap.entries()],
           collection: combosFolder,
@@ -125,12 +124,16 @@ export async function prodInfoUpdate() {
       // revalidate web app
       Logger.log('Updating web app cache');
       // updateWebAppProdCatCache({ action: 'PATCH', path: 'compose', content: { tag: 'REVALIDATE' } });
-      const { message: responseMessage, code } = await updateWebAppProdCatCache({
-        action: 'PATCH',
-        path: 'compose',
-        content: { tag: 'REVALIDATE' },
-      });
-      Logger.log(`${responseMessage} - Response status: ${code}`);
+      try {
+        const { message: responseMessage, code } = await updateWebAppProdCatCache({
+          action: 'PATCH',
+          path: 'compose',
+          content: { tag: 'REVALIDATE' },
+        });
+        Logger.log(`${responseMessage} - Response status: ${code}`);
+      } catch (err) {
+        console.error('*****/***** Could not connect with server..'); // eslint-disable-line
+      }
     }
     Logger.log('DONE!');
     return {

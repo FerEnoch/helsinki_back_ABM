@@ -43,7 +43,7 @@ export async function overwriteCacheSheetData(sheetID, sheetName, rawData) {
   const cacheSpreadsheet = SpreadsheetApp.openById(sheetID);
   const cacheSheet = cacheSpreadsheet.getSheetByName(sheetName);
 
-  const toCacheSheetData = await toCacheSheetDataBuilding([...rawData]);
+  const toCacheSheetData = await toCacheSheetDataBuilding(rawData);
   if (!toCacheSheetData.length) throw new Error(`Unable to build data to copy to ${sheetName} sheet`);
 
   if (toCacheSheetData.length > 0) {
