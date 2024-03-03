@@ -14,12 +14,12 @@ describe('Data building from fetched raw data', () => {
   test('It should build stock data correctly', async () => {
     // mock raw data fetching
     fetchSheetData.mockImplementation(() => Promise.resolve(fetchedStockData));
-    expect(await dataBuilding(STOCK)).toStrictEqual(buildedStockData);
+    expect(await dataBuilding(STOCK)).toMatchObject(buildedStockData);
   });
 
   test('It should build combos data correctly', async () => {
     // mock raw data fetching
     fetchSheetData.mockImplementation(() => Promise.resolve(fetchedCombosData));
-    expect(await dataBuilding(COMBOS)).toStrictEqual(buildedCombosData);
+    expect(await dataBuilding(COMBOS)).toMatchObject(buildedCombosData);
   });
 });

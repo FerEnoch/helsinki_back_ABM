@@ -29,7 +29,7 @@ export const COLUMN_HEADERS = {
   COMBOS: {
     id: /id/i,
     category: /categor[íi]a/i,
-    type: /tipo/i,
+    name: /nombre/i,
     featInfo: /info/i,
     products: /productos/i,
     price: /precio/i,

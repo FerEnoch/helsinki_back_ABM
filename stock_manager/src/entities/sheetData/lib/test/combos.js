@@ -1,6 +1,6 @@
 export const fetchedCombosData = {
   rawData: [
-    ['Id', 'Categoría', 'Tipo', 'Productos', 'Precio', 'Info. destacada', 'Imagen'],
+    ['Id', 'Categoría', 'Nombre', 'Productos', 'Precio', 'Info. destacada', 'Imagen'],
     [
       '*001',
       'Promos del finde',
@@ -31,8 +31,10 @@ export const buildedCombosData = [
   {
     id: '*001',
     category: 'Promos del finde',
+    name: 'Promo verano',
     type: 'Promo verano',
     featInfo: 'Solo por febrero!',
+    stock: true,
     products: [
       ['#003', '2'],
       ['#055', '2'],
@@ -46,8 +48,10 @@ export const buildedCombosData = [
   {
     id: '*002',
     category: 'Promos del finde',
+    name: 'Promo invierno',
     type: 'Promo invierno',
     featInfo: 'Solo por mayo',
+    stock: true,
     products: [
       ['#003', '2'],
       ['#055', '2'],
@@ -65,8 +69,10 @@ export const testCombosMapBuilding = {
     {
       id: '*001',
       category: 'Promos del finde',
+      name: 'Promo verano',
       type: 'Promo verano',
       featInfo: 'Solo por febrero!',
+      stock: true,
       products: [
         ['#003', '2'],
         ['#055', '2'],
@@ -80,8 +86,10 @@ export const testCombosMapBuilding = {
     {
       id: '*002',
       category: 'Promos del finde',
+      name: 'Promo invierno',
       type: 'Promo invierno',
       featInfo: 'Solo por mayo',
+      stock: true,
       products: [
         ['#003', '2'],
         ['#055', '2'],
