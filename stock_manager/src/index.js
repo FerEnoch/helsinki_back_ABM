@@ -8,8 +8,9 @@ import { showSelectionWindow } from './features/selectImage/ui/showSelectionWind
 import { infoUpdate } from './features/infoUpdate';
 import { productsUpdate } from './features/prodInfoUpdate';
 
+const currentMode = process.env.STAGING ? 'prod-testing' : process.env.NODE_ENV;
 console.log( /* eslint-disable-line */
-  `Currently on ${process.env.NODE_ENV}-mode` 
+  `Currently on ${currentMode}-mode` 
 )
 
 global.onOpen = onOpen;

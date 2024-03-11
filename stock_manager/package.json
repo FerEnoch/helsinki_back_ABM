@@ -7,15 +7,18 @@
   "license": "MIT",
   "scripts": {
     "watch": "webpack --watch",
-    "build:dev": "NODE_ENV=development webpack",
-    "build:prod": "NODE_ENV=production webpack",
+    "build:dev": "NODE_ENV=development  STAGING=false webpack --env STAGING=false",
+    "build:prod": "NODE_ENV=production STAGING=false webpack --env STAGING=false",
+    "build:staging": "NODE_ENV=production webpack --env STAGING=true",
     "format": "prettier --write dist/code.js",
     "postbuild": "npm run format",
     "upload": "npx clasp push",
     "deploy:prod": "NODE_ENV=production jest --silent && npm run build:prod && npm run upload",
+    "deploy:staging": "NODE_ENV=production STAGING=true jest --silent && npm run build:staging && npm run upload",
     "deploy:dev": "NODE_ENV=development jest --silent && npm run build:dev && npm run upload",
     "test:dev": "NODE_ENV=development jest",
-    "test:prod": "NODE_ENV=production jest"
+    "test:prod": "NODE_ENV=production jest --silent",
+    "test:staging": "NODE_ENV=production STAGING=true jest --silent"
   },
   "repository": {
     "type": "git",
