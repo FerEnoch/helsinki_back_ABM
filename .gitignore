@@ -2,8 +2,14 @@ node_modules
 */node_modules
 dist
 
+.env
+*/.env
+
 */.vscode
 */.clasp.json
+
+*/test
+*/__test__
 
 /orders_manager/src/features/updateStock/config/sheetsIDs.js
 

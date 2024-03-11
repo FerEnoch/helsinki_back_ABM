@@ -27,6 +27,8 @@ export const COLUMN_HEADERS = {
     price: /p[uú]blico/i,
   },
   COMBOS: {
+    id: /id/i,
+    category: /categor[íi]a/i,
     name: /nombre/i,
     featInfo: /info/i,
     products: /productos/i,

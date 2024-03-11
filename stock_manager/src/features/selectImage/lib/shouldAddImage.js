@@ -1,7 +1,7 @@
 import { COLUMN_HEADERS, SPREADSHEET } from '../../../entities/sheetData/config/spreadsheet';
 
 export function shouldAddImage({ selectedCell, spreadSheet }) {
-  const { STOCK, ACCOUNT } = SPREADSHEET;
+  const { STOCK, ACCOUNT, COMBOS } = SPREADSHEET;
   const {
     PRODUCTS: { image },
     MAIN_SHEET_ACCOUNT: { cbu_or_link: cbuOrLink },
@@ -13,7 +13,7 @@ export function shouldAddImage({ selectedCell, spreadSheet }) {
   const activeSheet = activeSpreadsheet.getActiveSheet();
   const activeSheetName = activeSheet.getName();
 
-  const isValidSheet = activeSheetName === STOCK || activeSheetName === ACCOUNT;
+  const isValidSheet = activeSheetName === STOCK || activeSheetName === ACCOUNT || activeSheetName === COMBOS;
   if (!isValidSheet) return false;
 
   const clickedRow = activeCell.getRow();
@@ -27,6 +27,11 @@ export function shouldAddImage({ selectedCell, spreadSheet }) {
   const firstCellValue = activeSheet.getRange(clickedRow, 1).getValue();
   if (activeSheetName === STOCK) {
     const isValidFirstCell = firstCellValue.toString().includes('#');
+    if (!isValidFirstCell) return false;
+  }
+
+  if (activeSheetName === COMBOS) {
+    const isValidFirstCell = firstCellValue.toString().includes('*');
     if (!isValidFirstCell) return false;
   }
 

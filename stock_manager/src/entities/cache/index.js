@@ -11,21 +11,23 @@ export async function getCacheSheetData(...args) {
   if (!cachedDataArrays?.length) return [];
   const cacheValues = [];
   const headers = [];
-  cachedDataArrays.forEach((valueDataRow, rowIndex) => {
-    if (!valueDataRow || !valueDataRow.length) return;
-    const value = {};
-    /* First row of the cache sheet is the headers row */
-    if (rowIndex === 0) {
-      valueDataRow.forEach((header) => {
-        headers.push(header);
+  await Promise.all(
+    cachedDataArrays.map(async (valueDataRow, rowIndex) => {
+      if (!valueDataRow || !valueDataRow.length) return;
+      const value = {};
+      /* First row of the cache sheet is the headers row */
+      if (rowIndex === 0) {
+        valueDataRow.forEach((header) => {
+          headers.push(header);
+        });
+        return;
+      }
+      valueDataRow.forEach((entry, entryIndex) => {
+        value[headers[entryIndex]] = entry;
       });
-      return;
-    }
-    valueDataRow.forEach((entry, entryIndex) => {
-      value[headers[entryIndex]] = entry;
-    });
-    cacheValues.push(value);
-  });
+      cacheValues.push(value);
+    })
+  );
   return cacheValues;
 }
 
@@ -41,7 +43,7 @@ export async function overwriteCacheSheetData(sheetID, sheetName, rawData) {
   const cacheSpreadsheet = SpreadsheetApp.openById(sheetID);
   const cacheSheet = cacheSpreadsheet.getSheetByName(sheetName);
 
-  const toCacheSheetData = await toCacheSheetDataBuilding([...rawData]);
+  const toCacheSheetData = await toCacheSheetDataBuilding(rawData);
   if (!toCacheSheetData.length) throw new Error(`Unable to build data to copy to ${sheetName} sheet`);
 
   if (toCacheSheetData.length > 0) {

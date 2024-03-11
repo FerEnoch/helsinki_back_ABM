@@ -20,7 +20,7 @@ export function analizeProductsToUpdateDatabase(newData, cachedData) {
     if (newProd === null || newProd === undefined) return;
     /* If no cache data is found, adds every product as new to firebase */
     if (!cachedData.length) {
-      toAddProdsSet.add({ ...newProd });
+      toAddProdsSet.add(newProd);
       return;
     }
     const newProdkeys = new Set();
@@ -29,24 +29,32 @@ export function analizeProductsToUpdateDatabase(newData, cachedData) {
     if (match) {
       Object.keys(newProd).forEach((prodKey) => newProdkeys.add(prodKey));
       Array.from(newProdkeys).forEach((prodKey) => {
-        isCompletelyEqual.add(match[prodKey] === newProd[prodKey]);
+        let cacheProdValue = match[prodKey];
+        let newProdValue = newProd[prodKey];
+
+        if (typeof cacheProdValue === 'object' && typeof newProdValue === 'object') {
+          cacheProdValue = cacheProdValue.join('');
+          newProdValue = newProdValue.join('');
+        }
+
+        isCompletelyEqual.add(cacheProdValue === newProdValue);
         /**
          * Testing logs
          */
-        // /* eslint-disable-next-line */
+        /* eslint-disable-next-line */
         // console.log([
-        //    newProd[prodKey],
-        //    match[prodKey],
-        //    'Are equal -->',
-        //    newProd[prodKey] === match[prodKey],
-        //  ]);
+        //   newProd[prodKey],
+        //   match[prodKey],
+        //   'Are equal -->',
+        //   newProd[prodKey] === match[prodKey],
+        // ])
         /**
          *
          */
       });
       if (!isCompletelyEqual.has(false)) {
         /** Products with no changes - product is returned */
-        toLeaveProdsSet.add({ ...match });
+        toLeaveProdsSet.add(match);
       } else {
         /** Products with changes - new product is returned */
         toUpdateProdsSet.add({
@@ -65,7 +73,7 @@ export function analizeProductsToUpdateDatabase(newData, cachedData) {
     const match = newData.find((newProd) => cachedProduct?.id === newProd?.id);
     if (match) return;
     /** Products to delete from firestore and web app cache */
-    toDeleteFromDatabaseProdsSet.add({ ...cachedProduct });
+    toDeleteFromDatabaseProdsSet.add(cachedProduct);
   });
 
   comparisonResult.push({

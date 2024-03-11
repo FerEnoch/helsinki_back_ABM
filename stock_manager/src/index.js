@@ -8,6 +8,11 @@ import { showSelectionWindow } from './features/selectImage/ui/showSelectionWind
 import { infoUpdate } from './features/infoUpdate';
 import { productsUpdate } from './features/prodInfoUpdate';
 
+const currentMode = process.env.STAGING ? 'prod-testing' : process.env.NODE_ENV;
+console.log( /* eslint-disable-line */
+  `Currently on ${currentMode}-mode` 
+)
+
 global.onOpen = onOpen;
 global.onEdit = onEdit;
 global.getOAuthToken = getOAuthToken;
