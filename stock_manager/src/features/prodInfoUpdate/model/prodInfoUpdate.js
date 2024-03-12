@@ -72,11 +72,11 @@ export async function prodInfoUpdate() {
         // delete firebase cache
         await deleteFirebaseCollection({ collection: productsFolder });
         // create new collection
-        Logger.log(`Revalidating PRODUCTS BY CATEGORIES cache`);
         const categoriesToCache = await createFirestoreDocs({
           documents: [...currentCategoryMap.entries()],
           collection: productsFolder,
         });
+        Logger.log(`Revalidating PRODUCTS BY CATEGORIES cache`);
         await cacheCategories(categoriesToCache);
       }
 
@@ -86,11 +86,11 @@ export async function prodInfoUpdate() {
 
         if (revalidateProdsCombos) {
           await deleteFirebaseCollection({ collection: combosFolder });
-          Logger.log(`Revalidating COMBOS cache`);
           const combosToCache = await createFirestoreDocs({
             documents: [...currentCombosMap.entries()],
             collection: combosFolder,
           });
+          Logger.log(`Revalidating COMBOS cache`);
           await cacheCombos(combosToCache);
         }
       } else if (currentCombosMap?.size > 0) {
