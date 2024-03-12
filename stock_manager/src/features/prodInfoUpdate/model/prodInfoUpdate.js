@@ -7,6 +7,8 @@ import { deleteFirebaseCollection } from '../lib/deleteFirebaseCollection';
 import { createFirestoreDocs } from '../lib/createFirestoreDocs';
 import { updateWebAppProdCatCache } from '../lib/updateWebAppProdCatCache';
 import { checkIfNeedToRevalidate } from './checkIfNeedToRevalidate';
+import { cacheCategories } from './cacheCategories';
+import { cacheCombos } from './cacheCombos';
 
 export async function prodInfoUpdate() {
   const { CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE, PRODUCTS_COMBOS_CACHE, STOCK, COMBOS } = SPREADSHEET;
@@ -45,30 +47,24 @@ export async function prodInfoUpdate() {
        * Es la acción inicial: no hay cache, es decir, es la primera carga.
        * Si no hay cache de categorías, no debería haber de combos tampoco.
        */
-      await Promise.all([
+      const [productToCache, combosToCache] = await Promise.all([
         createFirestoreDocs({
           documents: [...currentCategoryMap.entries()],
           collection: productsFolder,
-        }).then(async (toCache) => {
-          Logger.log(`Adding products by categories to cache sheet`);
-          await overwriteCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE, toCache);
         }),
         createFirestoreDocs({
           documents: [...currentCombosMap.entries()],
           collection: combosFolder,
-        }).then(async (toCache) => {
-          Logger.log(`Adding combos to cache sheet`);
-          await overwriteCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_COMBOS_CACHE, toCache);
         }),
       ]);
+      await Promise.all([cacheCategories(productToCache), cacheCombos(combosToCache)]);
       revalidateProdsCategories = true;
     } else {
       Logger.log(`FOUND CACHE PRODUCTS BY CATEGORIES --> Evaluate actions to update.`);
-
       revalidateProdsCategories = await checkIfNeedToRevalidate(buildedStockData, categoriesCacheSheetData);
 
       if (revalidateProdsCategories) {
-        Logger.log('Executing actions...');
+        Logger.log('Executing revalidation actions...');
         /**
          * Ya que borrar la colección completa vía rest API no se puede,
          * Opté por borrar cada documento (vaciar la colección), y crear los nuevos
@@ -77,54 +73,39 @@ export async function prodInfoUpdate() {
         await deleteFirebaseCollection({ collection: productsFolder });
         // create new collection
         Logger.log(`Revalidating PRODUCTS BY CATEGORIES cache`);
-        createFirestoreDocs({
+        const categoriesToCache = await createFirestoreDocs({
           documents: [...currentCategoryMap.entries()],
           collection: productsFolder,
-        }).then(async (toCache) => {
-          Logger.log(`Adding products to cache sheet`);
-          await overwriteCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_CATEGORIES_CACHE, toCache);
         });
-        // revalidate web app
-        // updateWebAppProdCatCache({ action: 'PATCH', path: 'compose', content: { tag: 'REVALIDATE' } });
+        await cacheCategories(categoriesToCache);
       }
 
       if (combosCacheSheetData.length > 0) {
         Logger.log(`FOUND CACHE COMBOS --> Evaluate actions to update`);
-
         revalidateProdsCombos = await checkIfNeedToRevalidate(buildedCombosData, combosCacheSheetData);
 
         if (revalidateProdsCombos) {
           await deleteFirebaseCollection({ collection: combosFolder });
           Logger.log(`Revalidating COMBOS cache`);
-          createFirestoreDocs({
+          const combosToCache = await createFirestoreDocs({
             documents: [...currentCombosMap.entries()],
             collection: combosFolder,
-          }).then(async (toCache) => {
-            Logger.log(`Adding combos to cache sheet`);
-            await overwriteCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_COMBOS_CACHE, toCache);
           });
-          // revalidate web app
-          // updateWebAppProdCatCache({ action: 'PATCH', path: 'compose', content: { tag: 'REVALIDATE' } });
+          await cacheCombos(combosToCache);
         }
       } else if (currentCombosMap?.size > 0) {
         Logger.log(`COMBOS CACHE IS EMPTY --> creating combos from scratch`);
-        createFirestoreDocs({
+        const combosToCache = await createFirestoreDocs({
           documents: [...currentCombosMap.entries()],
           collection: combosFolder,
-        }).then(async (toCache) => {
-          Logger.log(`Adding combos to cache sheet`);
-          await overwriteCacheSheetData(CACHE_SPREADSHEET_ID, PRODUCTS_COMBOS_CACHE, toCache);
         });
-        // revalidate web app
-        // updateWebAppProdCatCache({ action: 'PATCH', path: 'compose', content: { tag: 'REVALIDATE' } });
+        await cacheCombos(combosToCache);
         revalidateProdsCombos = true;
       }
     }
     const isNeededToRevalidateCache = revalidateProdsCategories || revalidateProdsCombos;
     if (isNeededToRevalidateCache) {
-      // revalidate web app
       Logger.log('Updating web app cache');
-      // updateWebAppProdCatCache({ action: 'PATCH', path: 'compose', content: { tag: 'REVALIDATE' } });
       try {
         const { message: responseMessage, code } = await updateWebAppProdCatCache({
           action: 'PATCH',
