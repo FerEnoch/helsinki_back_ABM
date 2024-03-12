@@ -29,7 +29,8 @@ export async function prodInfoUpdate() {
     ]);
     // const currentCombosMap = buildCombosInfo(compiledCombosData);
     Logger.log(`
-    Total found categories --> ${buildedStockData.length}
+    Total found individual products --> ${buildedStockData.length}
+    Total found categories --> ${currentCategoryMap.size}
     Total found combos --> ${buildedCombosData.length}
     `);
 
