@@ -93,7 +93,11 @@ export async function dataBuilding(sheet) {
                 processCombo = processCombo.replace('/', '');
               }
               if (processCombo.includes('-')) {
-                return processCombo.trim().split('-');
+                return processCombo
+                  .trim()
+                  .split('-')
+                  .map((value) => value.trim())
+                  .flat();
               }
               return [processCombo.trim(), String(1)];
             })
