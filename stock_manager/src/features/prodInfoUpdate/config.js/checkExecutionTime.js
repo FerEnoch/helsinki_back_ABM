@@ -1,6 +1,6 @@
 export const MAX_TASK_TIME_IN_MIN = 5;
 
-export function initiateTaskTime() {
+function initiateTaskTime() {
   const date = new Date();
   const initialTimeInMs = date.getTime();
   const initialHour = date.toLocaleTimeString('es-AR');
