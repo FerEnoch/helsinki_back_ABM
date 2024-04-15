@@ -30,7 +30,7 @@ export async function productsUpdate() {
         }
       });
     } catch (e) {
-            console.error(e.message); /* eslint-disable-line */
+      console.error(e.message); /* eslint-disable-line */
       if (e.cause === 429) {
         UI.alert(e.message);
         return;

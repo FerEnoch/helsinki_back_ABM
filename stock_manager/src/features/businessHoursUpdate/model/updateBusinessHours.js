@@ -1,64 +1,72 @@
-import { businessSheetMap, englishDays } from '../config';
-import { getCellValues } from '../lib/getCellValues';
+import { getCacheSheetData, overwriteCacheSheetData } from '../../../entities/cache';
+import { SPREADSHEET } from '../../../entities/sheetData/config/spreadsheet';
+import { DATABASE_API_ACTIONS, WEB_APP_CACHE_UPDATE } from '../../../shared/api';
+import { DATABASE_OPERATIONS } from '../../../shared/api/config/database-operations';
+import { DATABASE_FOLDERS } from '../../../shared/api/config/firebase-api';
+import { getBusinessHours } from './getBusinessHours';
 
-/**
- * TO DO
- * agregar a la api --> info: "Urquiza y Cándido Pujato"
- *                      takeAwayCost: 0
- * 
- *   {
-      label: 'Delivery',
-      info: '',
-      price: numbers.deliveryCostNumber,
-    },
- */
-export function updateBusinessHours() {
-  const businessMap = {};
+export async function updateBusinessHours() {
+  const {
+    STOCK_SPREADSHEET_ID,
+    CACHE_SPREADSHEET_ID,
+    BUSINESS_HOURS: hoursGridSheet,
+    BUSINESS_HOURS_CACHE,
+  } = SPREADSHEET;
+  const { CREATE, UPDATE } = DATABASE_OPERATIONS;
+  const {
+    CORPORATIVE_INFO: { UPDATE: updateWebApp },
+  } = WEB_APP_CACHE_UPDATE;
+  const { BUSINESS_HOURS: businessHoursFolder } = DATABASE_FOLDERS;
 
-  Object.entries(businessSheetMap).forEach(([key, value]) => {
-    if (typeof value === 'string') {
-      businessMap[key] = getCellValues(value);
-    }
-    if (key === 'businessHours') {
-      businessMap[key] = {
-        delivery: {
-          normalNight: {
-            from: getCellValues(value.delivery.normalStart),
-            to: getCellValues(value.delivery.normalClose),
-          },
-          extendedNight: {
-            from: getCellValues(value.delivery.extendedStart),
-            to: getCellValues(value.delivery.extendedClose),
-          },
-        },
-        takeAway: {
-          earlyAfternoon: {
-            from: getCellValues(value.takeAway.earlyAfternoonStart),
-            to: getCellValues(value.takeAway.earlyAfternoonClose),
-          },
-          normalNight: {
-            from: getCellValues(value.takeAway.normalNightStart),
-            to: getCellValues(value.takeAway.normalNightClose),
-          },
-          extendedNight: {
-            from: getCellValues(value.takeAway.extendedNightStart),
-            to: getCellValues(value.takeAway.extendedNightClose),
-          },
-        },
+  let message = 'success';
+
+  const mainSpreadsheet = SpreadsheetApp.openById(STOCK_SPREADSHEET_ID);
+  const businessHoursSheet = mainSpreadsheet.getSheetByName(hoursGridSheet);
+  const compiledBusinessHours = getBusinessHours({ sheet: businessHoursSheet });
+
+  if (!Object.values(compiledBusinessHours).length) {
+    message = 'Unable to build business hours data ...';
+    throw new Error(message);
+  }
+
+  const firestoreBusinessHoursDoc = {
+    folder: businessHoursFolder,
+    docLabel: businessHoursFolder,
+    data: compiledBusinessHours,
+  };
+
+  let businessHoursToCache;
+  const cacheSheetData = await getCacheSheetData(CACHE_SPREADSHEET_ID, BUSINESS_HOURS_CACHE);
+
+  try {
+    if (!cacheSheetData.length) {
+      Logger.log(`CACHE IS EMPTY --> creating firestore doc: business-hours`);
+      businessHoursToCache = DATABASE_API_ACTIONS[CREATE](firestoreBusinessHoursDoc);
+      Logger.log(`Adding business-hours to cache sheet`);
+    } else {
+      Logger.log(`FOUND CACHE BUSINESS-HOURS --> Updating Firebase and overwriting cache anyway.`);
+
+      const [businessHoursCache] = cacheSheetData;
+
+      const businessHoursToUpdate = {
+        folder: businessHoursFolder,
+        docLabel: businessHoursFolder,
+        firestoneNameID: businessHoursCache['firestoreName-ID'],
+        data: compiledBusinessHours,
       };
+      businessHoursToCache = DATABASE_API_ACTIONS[UPDATE](businessHoursToUpdate);
+
+      Logger.log(`Updating web app BUSINESS HOURS cache --> ${businessHoursFolder}`);
+      // Web app api route is always -->  businessHoursFolder ==> 'businessHours'
+      const { message: responseMessage, code } = updateWebApp({ label: 'businessHours' });
+      Logger.log(`${responseMessage} - Response status: ${code}`);
     }
 
-    if (key === 'grid') {
-      businessMap.grid = value.map(({ day, delivery, takeAway }) => {
-        const { label: dayLabel } = englishDays.filter(({ regex }) => regex.test(getCellValues(day)))[0];
-        return {
-          day: dayLabel,
-          delivery: getCellValues(delivery),
-          takeAway: getCellValues(takeAway),
-        };
-      });
-    }
-  });
-
-  return businessMap;
+    await overwriteCacheSheetData(CACHE_SPREADSHEET_ID, BUSINESS_HOURS_CACHE, [businessHoursToCache]);
+    Logger.log('DONE!');
+  } catch (e) {
+    message = 'failure';
+    console.error(e.message); /* eslint-disable-line */
+  }
+  return { message };
 }

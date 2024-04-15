@@ -1,8 +1,8 @@
 import { finalBusinessGrid } from '../test/finalBusinessGrid';
-import { updateBusinessHours } from './updateBusinessHours';
+import { getBusinessHours } from './getBusinessHours';
 
 jest.mock('../lib/getCellValues', () => ({
-  getCellValues: jest.fn((range) => {
+  getCellValues: jest.fn(({ range }) => {
     if (range === 'B2') return 750;
     if (range === 'B3') return 10;
     if (range === 'B16') return 20;
@@ -43,6 +43,6 @@ jest.mock('../lib/getCellValues', () => ({
 
 describe('Build business hours from sheet', () => {
   it('Should get values correctly', () => {
-    expect(updateBusinessHours()).toMatchObject(finalBusinessGrid);
+    expect(getBusinessHours({ sheet: 'test' })).toMatchObject(finalBusinessGrid);
   });
 });

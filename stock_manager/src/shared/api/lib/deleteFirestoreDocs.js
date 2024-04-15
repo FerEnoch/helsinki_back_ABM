@@ -1,5 +1,5 @@
 import { checkExecutionTime } from '../../../features/prodInfoUpdate/config.js/checkExecutionTime';
-import { ERROR_MESSAGES } from '../config/firebase-api';
+import { ERROR_MESSAGES } from '../../config/ui-messages';
 import { firestoreDeleteDoc } from '../model/firestoreDeleteDoc';
 
 export async function deleteFirestoreDocs({ documents = [], collection }) {

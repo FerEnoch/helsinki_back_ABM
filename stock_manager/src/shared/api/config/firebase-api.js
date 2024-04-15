@@ -13,6 +13,7 @@ const devMode = process.env.NODE_ENV === 'development';
 export const DATABASE_FOLDERS = {
   PRODUCTS_BY_CATEGORIES: devMode ? 'categories-test' : 'products-categories',
   PRODUCTS_COMBOS: devMode ? 'combos-test' : 'products-combos',
+  BUSINESS_HOURS: devMode ? 'hoursTest' : 'businessHours',
   INFO: 'info',
   PAYMENT_METHODS: 'paymentMethods',
   FAQ: 'faq',
@@ -30,15 +31,6 @@ export const FIREBASE = {
     METADATA_URL: (folder, fileName) =>
       `${STORAGE_METADATA}/${STORAGE_BUCKET_NAME}/o/${encodeURIComponent(`${folder}/${fileName}`)}`,
   },
-};
-
-export const ERROR_MESSAGES = {
-  GENERIC: `😕 La aplicación no se pudo actualizar totalmente porque ocurrió algún problema...`,
-  CUOTA_EXCEEDED: `
-  ERROR CATASTROFICO 😭
-  Se ha excedido la cuota de la base de datos... La aplicación quedará desactualizada hasta el final del día... 🙇
-  Intentar seguir con las actualizaciones mañana.
-  `,
 };
 
 /**

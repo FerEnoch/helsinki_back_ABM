@@ -1,5 +1,6 @@
+import { ERROR_MESSAGES } from '../../config/ui-messages';
 import { firestoreAccessToken } from '../config/access-tokens';
-import { ERROR_MESSAGES, FIREBASE } from '../config/firebase-api';
+import { FIREBASE } from '../config/firebase-api';
 import { handleImagesStorage } from './handleImagesStorage';
 
 export function createFirestoreDocument({ folder, docLabel, data: compiledData = [] }) {
@@ -17,7 +18,7 @@ export function createFirestoreDocument({ folder, docLabel, data: compiledData =
       muteHttpExceptions: true,
       payload: JSON.stringify({
         fields: {
-          [docLabel]: { stringValue: JSON.stringify([...compiledData]) },
+          [docLabel]: { stringValue: JSON.stringify(compiledData) },
         },
       }),
       headers: {
@@ -34,7 +35,7 @@ export function createFirestoreDocument({ folder, docLabel, data: compiledData =
       createdDataToCache = {
         'firestoreName-ID': docID,
         firestoreName: name,
-        data: JSON.stringify([...compiledData]),
+        data: JSON.stringify(compiledData),
       };
       Logger.log(`FILE CREATED: ${docID}`);
 

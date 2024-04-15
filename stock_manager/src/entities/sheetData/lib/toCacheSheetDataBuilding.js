@@ -6,20 +6,32 @@
 
 export async function toCacheSheetDataBuilding(dataToBuildCache) {
   const headers = new Set();
-  const productsData = [];
-  dataToBuildCache.forEach((fromDatabaseProd) => {
-    const productArr = [];
-    if (!fromDatabaseProd) return;
-    Object.keys(fromDatabaseProd).forEach((prodKey) => {
-      headers.add(prodKey);
+  const data = [];
+  dataToBuildCache.forEach((fromDatabaseInfo) => {
+    const infoArr = [];
+    if (!fromDatabaseInfo) return;
+    Object.entries(fromDatabaseInfo).forEach(([key, value]) => {
+      headers.add(key);
+      infoArr.push(value);
     });
-    Object.values(fromDatabaseProd).forEach((productValue) => {
-      productArr.push(productValue);
-    });
-    productsData.push(productArr);
+    data.push(infoArr);
   });
+  /* old-api */
+  // const productsData = [];
+  // dataToBuildCache.forEach((fromDatabaseProd) => {
+  //   const productArr = [];
+  //   if (!fromDatabaseProd) return;
+  //   Object.keys(fromDatabaseProd).forEach((prodKey) => {
+  //     headers.add(prodKey);
+  //   });
+  //   Object.values(fromDatabaseProd).forEach((productValue) => {
+  //     productArr.push(productValue);
+  //   });
+  //   productsData.push(productArr);
+  // });
 
-  const builtRow = [[...headers], ...productsData];
+  // const builtRow = [[...headers], ...productsData];
+  const builtRow = [[...headers], ...data];
 
   return builtRow;
 }

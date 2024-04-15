@@ -16,12 +16,12 @@ export async function checkIfNeedToRevalidate(compiledProds, cacheCategories) {
       content.forEach((prod) => {
         categorySet.add(prod.category);
       });
-      console.log( /* eslint-disable-line*/
-        `
-       CATEGORIES ANALIZED (${categorySet.size}) --> ${[...categorySet]}
-         ${content.length} items to ${action} 
-       `
-      );
+      // console.log( /* eslint-disable-line*/
+      //   `
+      //  CATEGORIES ANALIZED (${categorySet.size}) --> ${[...categorySet]}
+      //    ${content.length} items to ${action}
+      //  `
+      // );
     }
   });
 

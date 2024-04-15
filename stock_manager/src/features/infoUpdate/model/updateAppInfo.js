@@ -35,19 +35,19 @@ export async function updateAppInfo() {
   const firestoreInfoDocument = {
     folder: infoFolder,
     docLabel: infoFolder,
-    data: [{ ...compiledInfo }],
+    data: [compiledInfo],
   };
 
   const firestoreFaqDocument = {
     folder: faqFolder,
     docLabel: faqFolder,
-    data: [{ ...compiledFaq }],
+    data: [compiledFaq],
   };
 
   const firestorePaymentMethodsDocument = {
     folder: paymentMethodsFolder,
     docLabel: paymentMethodsFolder,
-    data: [...compiledMPaymentMethods],
+    data: [compiledMPaymentMethods],
   };
 
   let dataInfoToCache;
@@ -77,7 +77,7 @@ export async function updateAppInfo() {
         folder: infoFolder,
         docLabel: infoFolder,
         firestoneNameID: info['firestoreName-ID'],
-        data: [{ ...compiledInfo }],
+        data: [compiledInfo],
       };
       dataInfoToCache = DATABASE_API_ACTIONS[UPDATE](infoToUpdate);
 
@@ -85,7 +85,7 @@ export async function updateAppInfo() {
         folder: faqFolder,
         docLabel: faqFolder,
         firestoneNameID: faq['firestoreName-ID'],
-        data: [{ ...compiledFaq }],
+        data: [compiledFaq],
       };
       dataFaqToCache = DATABASE_API_ACTIONS[UPDATE](faqToUpdate);
 
@@ -93,7 +93,7 @@ export async function updateAppInfo() {
         folder: paymentMethodsFolder,
         docLabel: paymentMethodsFolder,
         firestoneNameID: paymentMethods['firestoreName-ID'],
-        data: [...compiledMPaymentMethods],
+        data: [compiledMPaymentMethods],
       };
       dataPaymentMethodsToCache = DATABASE_API_ACTIONS[UPDATE](paymentMethodsToUpdate);
 
@@ -105,9 +105,9 @@ export async function updateAppInfo() {
     }
 
     await overwriteCacheSheetData(CACHE_SPREADSHEET_ID, INFO_CACHE, [
-      { ...dataInfoToCache },
-      { ...dataPaymentMethodsToCache },
-      { ...dataFaqToCache },
+      dataInfoToCache,
+      dataPaymentMethodsToCache,
+      dataFaqToCache,
     ]);
     Logger.log('DONE!');
   } catch (e) {

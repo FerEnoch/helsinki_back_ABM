@@ -12,7 +12,7 @@ const stagingMode = process.env.STAGING;
 
 export const LOCAL_PRODUCTION_URL = 'https://sjq5dd8h-3000.brs.devtunnels.ms';
 export const HOSTING_TESTING_URL = 'https://helsinki-delivery-web-app-git-prod-testing-ferenoch.vercel.app';
-export const HOSTING_URL = 'https://www.helsinkidelivery.com.ar';
+const HOSTING_URL = 'https://www.helsinkidelivery.com.ar';
 
 const prodModesURLs = stagingMode ? HOSTING_TESTING_URL : HOSTING_URL;
 

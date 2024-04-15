@@ -3,8 +3,9 @@ import { storageCreateFile } from '../model/storageCreateFile';
 
 export function handleImagesStorage(data) {
   /**  Only upload images for files that have Its image ID  */
-  const filesWithImage = data.filter((dataField) => dataField?.imageID?.length > 0).filter(Boolean);
-  if (filesWithImage.length > 0) {
+  const filesWithImage =
+    data?.length > 0 && data?.filter((dataField) => dataField?.imageID?.length > 0).filter(Boolean);
+  if (filesWithImage && filesWithImage.length > 0) {
     filesWithImage.forEach((file) => {
       /* Only upload image of files that hasn't already got its image in storage */
       const checkImageResponse = getStorageFileMetadataByName(file.imageID);

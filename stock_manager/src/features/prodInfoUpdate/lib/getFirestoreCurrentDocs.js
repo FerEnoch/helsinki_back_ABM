@@ -1,6 +1,7 @@
 // import { firestoreAccessToken } from '../config/access-tokens';
 import { firestoreAccessToken } from '../../../shared/api/config/access-tokens';
-import { ERROR_MESSAGES, FIREBASE } from '../../../shared/api/config/firebase-api';
+import { FIREBASE } from '../../../shared/api/config/firebase-api';
+import { ERROR_MESSAGES } from '../../../shared/config/ui-messages';
 
 function fetchData({ token = '', collection }) {
   const {

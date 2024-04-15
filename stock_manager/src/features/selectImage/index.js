@@ -1,6 +1,6 @@
 import { shouldAddImage } from './lib/shouldAddImage';
 
-export default function onEdit(e) {
+export function onEdit(e) {
   const { range: selectedCell, source: spreadSheet } = e;
 
   const addImageAction = shouldAddImage({ selectedCell, spreadSheet });

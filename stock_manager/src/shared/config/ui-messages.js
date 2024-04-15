@@ -17,7 +17,7 @@ export const UI_MESSAGES = {
       LABEL: '📱 Actualizar App',
       ITEM_1: {
         LABEL: '📲 Stock',
-        FUNCTION: 'productsUpdate', // deprecate stockUpdate
+        FUNCTION: 'productsUpdate',
         PROMPT: {
           INFO: 'Estás a punto de modificar info de producto',
           CONFIRM:
@@ -36,11 +36,31 @@ export const UI_MESSAGES = {
           INFO: 'Estas a punto de modificar información',
           CONFIRM:
             'Recuerda siempre hacer la mayor cantidad de cambios que necesites antes de actualizar\n¿Estás seguro?',
-          OPERATION_SUCCESS: '👍 Aplicación actualizada exitosamente',
+          OPERATION_SUCCESS: '👍 Aplicación actualizada con éxito',
+          OPERATION_FAILURE: UPDATE_OPERATION_FAILURE,
+          OPERATION_NOT_NECESSARY: UPDATE_OPERATION_NOT_NECESSARY,
+        },
+      },
+      ITEM_3: {
+        LABEL: '📲 Horarios',
+        FUNCTION: 'updateBusinessHours',
+        PROMPT: {
+          INFO: 'Estas a punto de modificar la grilla de horarios de la app',
+          CONFIRM: '¿Estás seguro?',
+          OPERATION_SUCCESS: '👍 Horarios de la aplicación actualizados con éxito',
           OPERATION_FAILURE: UPDATE_OPERATION_FAILURE,
           OPERATION_NOT_NECESSARY: UPDATE_OPERATION_NOT_NECESSARY,
         },
       },
     },
   },
+};
+
+export const ERROR_MESSAGES = {
+  GENERIC: `😕 La aplicación no se pudo actualizar totalmente porque ocurrió algún problema...`,
+  CUOTA_EXCEEDED: `
+  ERROR CATASTROFICO 😭
+  Se ha excedido la cuota de la base de datos... La aplicación quedará desactualizada hasta el final del día... 🙇
+  Intentar seguir con las actualizaciones mañana.
+  `,
 };

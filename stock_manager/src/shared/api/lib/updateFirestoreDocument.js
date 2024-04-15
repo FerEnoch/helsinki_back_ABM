@@ -1,5 +1,6 @@
+import { ERROR_MESSAGES } from '../../config/ui-messages';
 import { firestoreAccessToken } from '../config/access-tokens';
-import { ERROR_MESSAGES, FIREBASE } from '../config/firebase-api';
+import { FIREBASE } from '../config/firebase-api';
 import { handleImagesStorage } from './handleImagesStorage';
 
 export function updateFirestoreDocument({ folder, firestoneNameID, docLabel, data: compiledData = [] }) {
