@@ -43,7 +43,7 @@ export const UI_MESSAGES = {
       },
       ITEM_3: {
         LABEL: '📲 Horarios',
-        FUNCTION: 'updateBusinessHours',
+        FUNCTION: 'businessHours',
         PROMPT: {
           INFO: 'Estas a punto de modificar la grilla de horarios de la app',
           CONFIRM: '¿Estás seguro?',
