@@ -56,10 +56,14 @@ export async function updateBusinessHours() {
       };
       businessHoursToCache = DATABASE_API_ACTIONS[UPDATE](businessHoursToUpdate);
 
-      Logger.log(`Updating web app BUSINESS HOURS cache --> ${businessHoursFolder}`);
-      // Web app api route is always -->  businessHoursFolder ==> 'businessHours'
-      const { message: responseMessage, code } = updateWebApp({ label: 'businessHours' });
-      Logger.log(`${responseMessage} - Response status: ${code}`);
+      try {
+        Logger.log(`Updating web app BUSINESS HOURS cache --> ${businessHoursFolder}`);
+        // Web app api route is always -->  businessHoursFolder ==> 'businessHours'
+        const { message: responseMessage, code } = updateWebApp({ label: 'businessHours' });
+        Logger.log(`${responseMessage} - Response status: ${code}`);
+      } catch (err) {
+        console.error('*****/***** Could not connect with server..'); // eslint-disable-line
+      }
     }
 
     await overwriteCacheSheetData(CACHE_SPREADSHEET_ID, BUSINESS_HOURS_CACHE, [businessHoursToCache]);
